@@ -19,6 +19,14 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+2.0.1	9 May 2019
+	* Improved robustness of reveng()
+
+2.0.0	6 May 2019
+	* Much faster brute force search for generator polynomials if
+	  the most compact difference between right-aligned arguments is
+	  not more than twice the specified WIDTH.
+
 1.6.3	20 April 2019
 	* Added algorithm CRC-32/CD-ROM-EDC from the CRC Catalogue.
 	* Model class of CRC-16/ARC, CRC-16/GSM changed to 'attested'.

@@ -1,5 +1,5 @@
 /* cli.c
- * Greg Cook, 24/Mar/2019
+ * Greg Cook, 29/Apr/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -298,7 +298,7 @@ ipqx:
 				if(mode == 'v')
 					prev(&apoly);
 
-				crc = pcrc(apoly, model.spoly, model.init, model.xorout, model.flags);
+				crc = pcrc(apoly, model.spoly, model.init, model.xorout, model.flags, 0);
 
 				if(mode == 'v')
 					prev(&crc);
@@ -401,7 +401,7 @@ ipqx:
 						if(pset.flags & P_REFOUT)
 							prev(&apoly);
 						for(qptr = apolys; qptr < pptr; ++qptr) {
-							crc = pcrc(*qptr, pset.spoly, pset.init, apoly, 0);
+							crc = pcrc(*qptr, pset.spoly, pset.init, apoly, 0, 0);
 							if(ptst(crc)) {
 								pfree(&crc);
 								break;

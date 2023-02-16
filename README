@@ -357,7 +357,9 @@ and output:
 		other whitespace), and if the digits are maskable in the
 		system character encoding, as digits 0-9 are in ASCII,
 		EBCDIC and UTF-8.  This is because the lowest bits of
-		each byte are extracted as described above.
+		each byte are extracted as described above.  The -e
+		switch can be used to verify that the messages are being
+		read as expected.
 	-A OBITS
 		Specifies the number of bits per character in output.
 	-f
@@ -535,11 +537,21 @@ that bit ordering.  Otherwise, it tries RefIn = False, RefOut = False
 then RefIn = True, RefOut = True.  Crossed-endian algorithms are also
 uncommon and the program will not search for them.
 
-To find the Poly value when Init is not known, there must be at least
-two arguments having the same length.
+The search for the Poly value proceeds much faster if the most compact
+difference between any two right-aligned arguments is limited to a few
+bytes in length.  The search space is then determined by the length of
+the difference, less the length of the generator polynomial.  When the
+CRC algorithm is wide, try for instance to obtain a pair of codewords
+where the message portion differs only in the last byte or two.  Even if
+the difference at the end of the message portion is as long as the
+checksum itself, the number of trial divisions needed is still cut in
+half.
 
-To find both the Init and XorOut values, there must be at least two
-arguments having different lengths; otherwise there is only enough
+To find the Poly value when Init is not known, at least two of the given
+arguments must have the same length.
+
+To find both the Init and XorOut values, at least two of the given
+arguments must have different lengths; otherwise there is only enough
 information to determine one value, given the other.  If all arguments
 have the same length then, by default,  CRC RevEng fixes XorOut at zero
 and calculates Init accordingly.  (In hardware it is easier to set a
@@ -574,6 +586,18 @@ concatenated coefficients as a binary integer, the range can be up to
 (but excluding) a specified polynomial, from a specified polynomial
 upwards, or from one polynomial up to (but excluding) another.
 
+Where a compact difference between arguments has been found, the
+polynomial that is searched for is not the generator itself, but its
+shorter cofactor whose value is determined by the difference between the
+message portions of the arguments.  Candidate generator polynomials are
+then obtained by dividing the difference by the cofactor, and taking the
+quotient when the remainder is zero.  In such cases it is this cofactor
+whose width and value is displayed in the progress messages; the width
+is displayed for information purposes, but should not be entered at the
+command line when restarting a search.  Only the width of the CRC
+algorithm itself should be entered, along with the polynomial value
+printed in the most recent progress message.
+
 Polynomial range searching is enabled using [-p POLY] -q QPOLY, where
 POLY and QPOLY are hex strings.  -p POLY, if given, must precede
 -q QPOLY.  To start searching at a polynomial, use -p POLY -q 0.  To
@@ -581,27 +605,29 @@ stop searching at a polynomial (exclusive), use -q QPOLY.  To search
 between two polynomial values, use -p POLY -q QPOLY.
 
 Range limiting does not apply to the initial check against the preset
-models, or to Init or XorOut values, which are computed using a fast,
-efficient algorithm.
+models, or to Init or XorOut values, which are computed using Ewing's
+fast, efficient algorithm.
 
 For example, to split a 32-bit search into four processes:
 
-	reveng -w 32 -q 40000000 -s c98964f6b9 a5fa49f2fd 13370aee7df0
-	reveng -w 32 -p 40000000 -q 80000000 \
-		-s c98964f6b9 a5fa49f2fd 13370aee7df0
-	reveng -w 32 -p 80000000 -q c0000000 \
-		-s c98964f6b9 a5fa49f2fd 13370aee7df0
-	reveng -w 32 -p c0000000 -q 0 \
-		-s c98964f6b9 a5fa49f2fd 13370aee7df0
+	reveng -w 32 -q 40000000 -F -s \
+		123456789aaf946042 edcb8434325a439fbd 2468ace03238f64e
+	reveng -w 32 -p 40000000 -q 80000000 -F -s \
+		123456789aaf946042 edcb8434325a439fbd 2468ace03238f64e
+	reveng -w 32 -p 80000000 -q c0000000 -F -s \
+		123456789aaf946042 edcb8434325a439fbd 2468ace03238f64e
+	reveng -w 32 -p c0000000 -q 0 -F -s \
+		123456789aaf946042 edcb8434325a439fbd 2468ace03238f64e
 
 To continue an interrupted search:
 NB: If an either-endian search is stopped while RefIn/RefOut = False
 then it takes two further command lines to complete the search: one
 big-endian range search, and one little-endian full search.
 
-	reveng -w 32 -p 50000001 -q 0 -b \
-		-s c98964f6b9 a5fa49f2fd 13370aee7df0
-	reveng -w 32 -l -s c98964f6b9 a5fa49f2fd 13370aee7df0
+	reveng -w 32 -p 50000001 -q 0 -b -F -s \
+		123456789aaf946042 edcb8434325a439fbd 2468ace03238f64e
+	reveng -w 32 -l -F -s \
+		123456789aaf946042 edcb8434325a439fbd 2468ace03238f64e
 
 The full list of search options is as follows:
 
@@ -656,8 +682,9 @@ CRC RevEng provides a few additional options for convenience:
 SEARCH EXAMPLES
 
 	reveng -w 16 -l -F -s 31816b 32c16a 31326a0a
-	reveng -w 32 -p 04c11db7 -l -s c98964f6b9 a5fa49f2fd 13370aee7df0
 	reveng -w 32 -l -s c98964f6b9 a5fa49f2fd 13370aee7df0
+	reveng -w 32 -l -F -s \
+		123456789aaf946042 edcb8434325a439fbd 2468ace03238f64e
 
 A comprehensive list is being compiled.
 

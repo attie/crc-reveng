@@ -1,5 +1,5 @@
 /* reveng.c
- * Greg Cook, 23/Feb/2019
+ * Greg Cook, 9/May/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2013-09-16: calini(), calout() work on shortest argument
+/* 2019-04-30: brute-force short factor if shortest diff <= 2n
+ * 2013-09-16: calini(), calout() work on shortest argument
  * 2013-06-11: added sequence number to uprog() calls
  * 2013-02-08: added polynomial range search
  * 2013-01-18: refactored model checking to pshres(); renamed chkres()
@@ -54,6 +55,7 @@
 #include "reveng.h"
 
 static poly_t *modpol(const poly_t init, int rflags, int args, const poly_t *argpolys);
+static void dispch(const model_t *guess, int *resc, model_t **result, const poly_t divisor, int rflags, int args, const poly_t *argpolys);
 static void engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, const poly_t *argpolys);
 static void calout(int *resc, model_t **result, const poly_t divisor, const poly_t init, int flags, int args, const poly_t *argpolys);
 static void calini(int *resc, model_t **result, const poly_t divisor, int flags, const poly_t xorout, int args, const poly_t *argpolys);
@@ -64,82 +66,152 @@ static const poly_t pzero = PZERO;
 model_t *
 reveng(const model_t *guess, const poly_t qpoly, int rflags, int args, const poly_t *argpolys) {
 	/* Complete the parameters of a model by calculation or brute search. */
-	poly_t *pworks, *wptr, rem, gpoly;
+	poly_t *pworks, *wptr, rem = PZERO, factor = PZERO, gpoly = PZERO, qqpoly = PZERO;
 	model_t *result = NULL, *rptr;
 	int resc = 0;
 	unsigned long spin = 0, seq = 0;
 
-	if(~rflags & R_HAVEP) {
+	if(rflags & R_HAVEP) {
+		/* The poly is known.  Engineer, calculate or return
+		 * Init and XorOut.
+		 */
+		dispch(guess, &resc, &result, guess->spoly, rflags, args, argpolys);
+	} else {
 		/* The poly is not known.
 		 * Produce a list of differences between the arguments.
 		 */
-		pworks = modpol(guess->init, rflags, args, argpolys);
-		if(!pworks || !plen(*pworks)) {
-			free(pworks);
+		if(!plen(guess->spoly))
 			goto requit;
+		pworks = modpol(guess->init, rflags, args, argpolys);
+		/* If too short a difference is returned, there is nothing to do. */
+		if(!pworks)
+			goto requit;
+		else if(plen(*pworks) < plen(guess->spoly) + 1UL)
+			goto rpquit;
+
+		/* plen(*pworks) >= 2 */
+		/* If the shortest difference is the right length for the generator
+		 * polynomial (with its top bit), then it *is* the generator polynomial.
+		 */
+		else if(plen(*pworks) == plen(guess->spoly) + 1UL) {
+			pcpy(&gpoly, *pworks);
+			/* Chop the generator. + 1 term is present
+			 * as differences come normalized from modpol().
+			 */
+			pshift(&gpoly,gpoly,0UL,1UL,plen(gpoly),0UL); /* plen(gpoly) >= 1 */
+			dispch(guess, &resc, &result, gpoly, rflags, args, argpolys);
+			goto rpquit;
 		}
-		/* Initialise the guessed poly to the starting value. */
-		gpoly = pclone(guess->spoly);
+		/* Otherwise initialise the trial factor to the starting value. */
+		factor = pclone(guess->spoly);
+		if(rflags & R_HAVEQ)
+			qqpoly = pclone(qpoly);
+
+		/* Truncate trial factor and range end polynomial
+		 * if shortest difference is compact.
+		 */
+		rflags &= ~R_SHORT;
+		if(plen(*pworks) <= (plen(factor)) << 1) { /* plen(*pworks) >= 4, plen(factor) >= 2 */
+			rflags |= R_SHORT;
+			if((rflags & R_HAVEQ) || ptst(factor)) {
+				/* Validate range polynomials.
+				 * Ensure proper behaviour if the search space is
+				 * naively divided up as per the README.
+				 */
+				palloc(&rem, plen(*pworks) - plen(factor) - 1UL); /* >= 1 */
+				pinv(&rem);
+				pright(&rem, plen(factor)); /* >= 1 */
+
+				/*  If start polynomial out of range, do not search. */
+				if(pcmp(&rem, &factor) < 0)
+					goto rpquit;
+				/* If end polynomial out of range, do not compare,
+				 * just quit when trial factor rolls over.
+				 */
+				else if(pcmp(&rem, &qqpoly) < 0)
+					rflags &= ~R_HAVEQ;
+				/* Otherwise truncate end polynomial. */
+				else if(rflags & R_HAVEQ)
+					pright(&qqpoly, plen(*pworks) - plen(factor) - 1UL); /* >= 1 */
+				pfree(&rem);
+			}
+			/* Truncate trial factor. */
+			pright(&factor, plen(*pworks) - plen(factor) - 1UL); /* >= 1 */
+		}
+
 		/* Clear the least significant term, to be set in the
 		 * loop. qpoly does not need fixing as it is only
 		 * compared with odd polys.
 		 */
-		if(plen(gpoly))
-			pshift(&gpoly, gpoly, 0UL, 0UL, plen(gpoly) - 1UL, 1UL);
+		pshift(&factor, factor, 0UL, 0UL, plen(factor) - 1UL, 1UL);
 
-		while(piter(&gpoly) && (~rflags & R_HAVEQ || pcmp(&gpoly, &qpoly) < 0)) {
+		/* plen(factor) >= 1 */
+		while(piter(&factor) && (~rflags & R_HAVEQ || pcmp(&factor, &qqpoly) < 0)) {
 			/* For each possible poly of this size, try
 			 * dividing all the differences in the list.
 			 */
 			if(!(spin++ & R_SPMASK)) {
-				uprog(gpoly, guess->flags, seq++);
+				uprog(factor, guess->flags, seq++);
 			}
-			for(wptr = pworks; plen(*wptr); ++wptr) {
-				/* straight divide message by poly, don't multiply by x^n */
-				rem = pcrc(*wptr, gpoly, pzero, pzero, 0);
+			if(rflags & R_SHORT) {
+				/* test whether cofactor divides shortest difference */
+				wptr = pworks;
+				rem = pcrc(*wptr, factor, pzero, pzero, 0, NULL);
 				if(ptst(rem)) {
 					pfree(&rem);
-					break;
-				} else
+				} else {
 					pfree(&rem);
+					/* repeat division to get generator polynomial
+					 * then test generator against other differences
+					 */
+					rem = pcrc(*wptr, factor, pzero, pzero, 0, &gpoly);
+					pfree(&rem);
+					/* chop generator and ensure + 1 term */
+					pshift(&gpoly,gpoly,0UL,1UL,plen(gpoly) - 1UL,1UL);
+					piter(&gpoly); /* plen(gpoly) >= 1 */
+
+					for(++wptr; plen(*wptr); ++wptr) {
+						rem = pcrc(*wptr, gpoly, pzero, pzero, 0, NULL);
+						if(ptst(rem)) {
+							pfree(&rem);
+							break;
+						} else
+							pfree(&rem);
+					}
+				}
+			} else {
+				for(wptr = pworks; plen(*wptr); ++wptr) {
+					/* straight divide message by poly, don't multiply by x^n */
+					rem = pcrc(*wptr, factor, pzero, pzero, 0, 0);
+					if(ptst(rem)) {
+						pfree(&rem);
+						break;
+					} else
+						pfree(&rem);
+				}
 			}
-			/* If gpoly divides all the differences, it is a
+			/* If factor divides all the differences, it is a
 			 * candidate.  Search for an Init value for this
 			 * poly or if Init is known, log the result.
 			 */
 			if(!plen(*wptr)) {
-				/* gpoly is a candidate poly */
-				if(rflags & R_HAVEI && rflags & R_HAVEX)
-					chkres(&resc, &result, gpoly, guess->init, guess->flags, guess->xorout, args, argpolys);
-				else if(rflags & R_HAVEI)
-					calout(&resc, &result, gpoly, guess->init, guess->flags, args, argpolys);
-				else if(rflags & R_HAVEX)
-					calini(&resc, &result, gpoly, guess->flags, guess->xorout, args, argpolys);
-				else
-					engini(&resc, &result, gpoly, guess->flags, args, argpolys);
+				/* gpoly || factor is a candidate poly */
+				dispch(guess, &resc, &result, (rflags & R_SHORT) ? gpoly : factor, rflags, args, argpolys);
 			}
-			if(!piter(&gpoly))
+			if(!piter(&factor))
 				break;
 		}
-		/* Finished with gpoly and the differences list, free them.
+		/* Finished with factor and the differences list, free them.
 		 */
+rpquit:
+		pfree(&rem);
+		pfree(&qqpoly);
 		pfree(&gpoly);
+		pfree(&factor);
 		for(wptr = pworks; plen(*wptr); ++wptr)
 			pfree(wptr);
 		free(pworks);
 	}
-	else if(rflags & R_HAVEI && rflags & R_HAVEX)
-		/* All parameters are known!  Submit the result if we get here */
-		chkres(&resc, &result, guess->spoly, guess->init, guess->flags, guess->xorout, args, argpolys);
-	else if(rflags & R_HAVEI)
-		/* Poly and Init are known, calculate XorOut */
-		calout(&resc, &result, guess->spoly, guess->init, guess->flags, args, argpolys);
-	else if(rflags & R_HAVEX)
-		/* Poly and XorOut are known, calculate Init */
-		calini(&resc, &result, guess->spoly, guess->flags, guess->xorout, args, argpolys);
-	else
-		/* Poly is known but not Init; search for Init. */
-		engini(&resc, &result, guess->spoly, guess->flags, args, argpolys);
 
 requit:
 	if(!(result = realloc(result, ++resc * sizeof(model_t))))
@@ -155,6 +227,8 @@ requit:
 
 	return(result);
 }
+
+/* Private functions */
 
 static poly_t *
 modpol(const poly_t init, int rflags, int args, const poly_t *argpolys) {
@@ -222,6 +296,18 @@ modpol(const poly_t init, int rflags, int args, const poly_t *argpolys) {
 }
 
 static void
+dispch(const model_t *guess, int *resc, model_t **result, const poly_t divisor, int rflags, int args, const poly_t *argpolys) {
+	if(rflags & R_HAVEI && rflags & R_HAVEX)
+		chkres(resc, result, divisor, guess->init, guess->flags, guess->xorout, args, argpolys);
+	else if(rflags & R_HAVEI)
+		calout(resc, result, divisor, guess->init, guess->flags, args, argpolys);
+	else if(rflags & R_HAVEX)
+		calini(resc, result, divisor, guess->flags, guess->xorout, args, argpolys);
+	else
+		engini(resc, result, divisor, guess->flags, args, argpolys);
+}
+
+static void
 engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, const poly_t *argpolys) {
 	/* Search for init values implied by the arguments.
 	 * Method from: Ewing, Gregory C. (March 2010).
@@ -275,22 +361,22 @@ engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, c
 		psum(&apoly, pone, blen - alen); /* >= 1 */
 	}
 	if(plen(apoly) > dlen) {
-		mat[dlen] = pcrc(apoly, divisor, pzero, pzero, 0);
+		mat[dlen] = pcrc(apoly, divisor, pzero, pzero, 0, 0);
 		pfree(&apoly);
 	} else {
 		mat[dlen] = apoly;
 	}
 
 	/* Find the actual contribution of Init */
-	apoly = pcrc(*aptr, divisor, pzero, pzero, 0);
-	bpoly = pcrc(*bptr, divisor, pzero, apoly, 0);
+	apoly = pcrc(*aptr, divisor, pzero, pzero, 0, 0);
+	bpoly = pcrc(*bptr, divisor, pzero, apoly, 0, 0);
 
 	/* Populate the matrix */
 	palloc(&apoly, 1UL);
 	for(jptr=mat; jptr<mat+dlen; ++jptr)
 		*jptr = pzero;
 	for(iptr = jptr++; jptr < mat + (dlen << 1); iptr = jptr++)
-		*jptr = pcrc(apoly, divisor, *iptr, pzero, P_MULXN);
+		*jptr = pcrc(apoly, divisor, *iptr, pzero, P_MULXN, 0);
 	pfree(&apoly);
 
 	/* Transpose the matrix, augment with the Init contribution
@@ -377,7 +463,7 @@ calout(int *resc, model_t **result, const poly_t divisor, const poly_t init, int
 		}
 	}
 
-	xorout = pcrc(*aptr, divisor, init, pzero, 0);
+	xorout = pcrc(*aptr, divisor, init, pzero, 0, 0);
 	/* On little-endian algorithms, the calculations yield
 	 * the reverse of the actual xorout: in the Williams
 	 * model, the refout stage intervenes between init and
@@ -427,7 +513,7 @@ calini(int *resc, model_t **result, const poly_t divisor, int flags, const poly_
 	arg = pclone(*aptr);
 	prev(&arg);
 
-	init = pcrc(arg, rcpdiv, rxor, pzero, 0);
+	init = pcrc(arg, rcpdiv, rxor, pzero, 0, 0);
 	pfree(&arg);
 	pfree(&rxor);
 	pfree(&rcpdiv);
@@ -461,7 +547,7 @@ chkres(int *resc, model_t **result, const poly_t divisor, const poly_t init, int
 		prev(&xor);
 
 	for(; aptr < eptr; ++aptr) {
-		crc = pcrc(*aptr, divisor, init, xor, 0);
+		crc = pcrc(*aptr, divisor, init, xor, 0, 0);
 		if(ptst(crc)) {
 			pfree(&crc);
 			break;

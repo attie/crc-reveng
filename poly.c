@@ -1,5 +1,5 @@
 /* poly.c
- * Greg Cook, 23/Feb/2019
+ * Greg Cook, 9/May/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2017-11-28: added braces, redundant statement skipped in prev()
+/* 2019-04-29: added quotient argument to pcrc(), pmod()
+ * 2017-11-28: added braces, redundant statement skipped in prev()
  * 2016-06-27: pcmp() shortcut returns 0 when pointers identical
  * 2015-07-29: discard leading $, &, 0x from argument to strtop()
  * 2015-04-03: added direct mode to strtop()
@@ -81,8 +82,8 @@
  */
 
 #include <limits.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "reveng.h"
 
 static bmp_t getwrd(const poly_t poly, unsigned long iter);
@@ -311,7 +312,7 @@ strtop(const char *string, int flags, int bperhx) {
 char *
 ptostr(const poly_t poly, int flags, int bperhx) {
 	/* Returns a malloc()-ed string containing a hexadecimal
-	 * representation of poly. See phxsubs().
+	 * representation of poly. See pxsubs().
 	 */
 	return(pxsubs(poly, flags, bperhx, 0UL, poly.length));
 }
@@ -890,8 +891,9 @@ pinv(poly_t *poly) {
 }
 
 poly_t
-pmod(const poly_t dividend, const poly_t divisor) {
-	/* Divide dividend by normalised divisor and return the remainder
+pmod(const poly_t dividend, const poly_t divisor, poly_t *quotient) {
+	/* Divide dividend by normalised divisor and return the remainder.
+	 * Place the quotient in quotient unless it is NULL.
 	 * This function generates a temporary 'chopped' divisor for pcrc()
 	 * If calling repeatedly with a constant divisor, produce a chopped copy
 	 * with pchop() and call pcrc() directly for higher efficiency.
@@ -900,17 +902,18 @@ pmod(const poly_t dividend, const poly_t divisor) {
 
 	/* perhaps generate an error if divisor is zero */
 	poly_t subdivisor = psubs(divisor, 0UL, pfirst(divisor) + 1UL, plast(divisor), 0UL);
-	poly_t result = pcrc(dividend, subdivisor, pzero, pzero, 0);
+	poly_t result = pcrc(dividend, subdivisor, pzero, pzero, 0, quotient);
 	pfree(&subdivisor);
 	return(result);
 }
 
 poly_t
-pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t xorout, int flags) {
+pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t xorout, int flags, poly_t *quotient) {
 	/* Divide message by divisor and return the remainder.
 	 * init is added to divisor, highest terms aligned, before
 	 * division.
 	 * xorout is added to the remainder, highest terms aligned.
+	 * Place the quotient in quotient unless it is NULL.
 	 * If P_MULXN is set in flags, message is multiplied by x^n
 	 * (i.e. trailing zeroes equal to the CRC width are appended)
 	 * before adding init and division.  Set P_MULXN for most CRC
@@ -919,7 +922,7 @@ pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t
 	 * If all inputs are CLEAN, the returned poly_t will be CLEAN.
 	 */
 	unsigned long max = 0UL, iter, ofs, resiter;
-	bmp_t probe, rem, dvsr, *rptr, *sptr;
+	bmp_t probe, rem, dvsr, quot = BMP_C(0), *qptr, *rptr, *sptr;
 	const bmp_t *bptr, *eptr;
 	poly_t result = PZERO;
 
@@ -927,22 +930,47 @@ pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t
 		max = message.length;
 	else if(message.length > divisor.length)
 		max = message.length - divisor.length;
+	if(quotient)
+		palloc(quotient, max);
 	bptr=message.bitmap;
 	eptr=message.bitmap+SIZE(message.length);
+	qptr=quotient ? quotient->bitmap : NULL;
 	probe=~(~BMP_C(0) >> 1);
 	if(divisor.length <= (unsigned long) BMP_BIT
 		&& init.length <= (unsigned long) BMP_BIT) {
 		rem = init.length ? *init.bitmap : BMP_C(0);
 		dvsr = divisor.length ? *divisor.bitmap : BMP_C(0);
-		for(iter = 0UL, ofs = 0UL; iter < max; ++iter, --ofs) {
-			if(!ofs) {
-				ofs = BMP_BIT;
-				rem ^= *bptr++;
+		if(qptr) {
+			for(iter = 0UL, ofs = BMP_BIT; iter < max; ++iter) {
+				if(ofs == BMP_BIT) {
+					ofs = BMP_BIT - 1UL;
+					rem ^= *bptr++;
+				}
+				if(rem & probe) {
+					rem = (rem << 1) ^ dvsr;
+					quot |= (BMP_C(1) << ofs);
+				} else {
+					rem <<= 1;
+				}
+				if(!ofs--) {
+					ofs = BMP_BIT;
+					*qptr++ = quot;
+					quot = BMP_C(0);
+				}
 			}
-			if(rem & probe)
-				rem = (rem << 1) ^ dvsr;
-			else
-				rem <<= 1;
+			if(quot)
+				*qptr = quot;
+		} else {
+			for(iter = 0UL, ofs = 0UL; iter < max; ++iter, --ofs) {
+				if(!ofs) {
+					ofs = BMP_BIT;
+					rem ^= *bptr++;
+				}
+				if(rem & probe)
+					rem = (rem << 1) ^ dvsr;
+				else
+					rem <<= 1;
+			}
 		}
 		if(bptr < eptr)
 			/* max < message.length */
@@ -969,6 +997,8 @@ pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t
 				ofs = 0UL;
 				sptr = rptr = result.bitmap;
 				++sptr;
+				if(qptr)
+				       *qptr++ = *rptr;
 				/* iter < max <= message.length, so bptr is valid
 				 * shift result one word to the left, splicing in a message word
 				 * and clearing the last active word
@@ -978,13 +1008,21 @@ pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t
 					*rptr++ = *sptr++;
 			}
 			++ofs;
-			if(*result.bitmap & probe)
+			if(*result.bitmap & probe) {
 				psum(&result, divisor, ofs);
+			}
 		}
 		rptr = result.bitmap;
+		if(qptr) {
+			if(!probe)
+				*qptr = *rptr;
+			else if(ofs)
+				*qptr = *rptr & ~(~BMP_C(0) >> ofs);
+		}
 		++rptr;
 		while(bptr < eptr)
 			*rptr++ ^= *bptr++;
+
 		/* 0 <= ofs <= BMP_BIT, location of the first bit of the result */
 		pshift(&result, result, 0UL, ofs, (init.length > max + divisor.length ? init.length - max - divisor.length : 0UL) + divisor.length + ofs, 0UL);
 	}

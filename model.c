@@ -193,7 +193,7 @@ mcheck(model_t *model) {
 
 	/* generate the check string with the correct bit order */
 	checkstr = strtop("313233343536373839", model->flags, 8);
-	check = pcrc(checkstr, model->spoly, model->init, pzero, model->flags);
+	check = pcrc(checkstr, model->spoly, model->init, pzero, model->flags, 0);
 	pfree(&checkstr);
 	if(model->flags & P_REFOUT)
 		prev(&check);
@@ -208,7 +208,7 @@ mcheck(model_t *model) {
 	xorout=pclone(model->xorout);
 	if(model->flags & P_REFOUT)
 		prev(&xorout);
-	magic = pcrc(xorout, model->spoly, pzero, pzero, model->flags);
+	magic = pcrc(xorout, model->spoly, pzero, pzero, model->flags, 0);
 	pfree(&xorout);
 	if(model->flags & P_REFIN)
 		prev(&magic);

@@ -1,5 +1,5 @@
 /* reveng.h
- * Greg Cook, 24/Mar/2019
+ * Greg Cook, 9/May/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -93,7 +93,7 @@
 /* Global definitions */
 
 /* CRC RevEng version string */
-#define VERSION "1.6.3"
+#define VERSION "2.0.1"
 
 /* bmpbit.c */
 typedef BMP_T bmp_t;
@@ -166,8 +166,8 @@ extern void prev(poly_t *poly);
 extern void prevch(poly_t *poly, int bperhx);
 extern void prcp(poly_t *poly);
 extern void pinv(poly_t *poly);
-extern poly_t pmod(const poly_t dividend, const poly_t divisor);
-extern poly_t pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t xorout, int flags);
+extern poly_t pmod(const poly_t dividend, const poly_t divisor, poly_t *quotient);
+extern poly_t pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t xorout, int flags, poly_t *quotient);
 extern int piter(poly_t *poly);
 extern void palloc(poly_t *poly, unsigned long length);
 extern void pfree(poly_t *poly);
@@ -215,6 +215,7 @@ extern void mmatch(model_t *model, int flags);
 #define R_HAVERO     8
 #define R_HAVEX     16
 #define R_HAVEQ     32
+#define R_SHORT     64
 
 #define R_SPMASK 0x7FFFFFFUL
 
