@@ -19,6 +19,13 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+1.6.0	21 November 2018
+	* Added 2 new algorithms, CRC-8/NRSC-5, CRC-16/NRSC-5, from the
+	  CRC Catalogue.
+	* Renamed 31 algorithms; added 24 aliases to the old names.
+	* Added 10 other aliases.
+	* Added class descriptors to models[].
+
 1.5.3	26 July 2018
 	* Added algorithm CRC-24/OS-9 from the CRC Catalogue.
 	* Optimised prev() (thanks to Joerg Stippa).

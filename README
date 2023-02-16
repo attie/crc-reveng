@@ -58,7 +58,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 103 currently listed models available as presets.
+algorithms", with the 105 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -152,15 +152,15 @@ SPECIFYING A MODEL
 
 You can use one of the preset models or specify your own.
 
-	reveng -m crc-32
+	reveng -m crc-32/iso-hdlc
 
 selects the CRC-32 algorithm used in PKZIP and elsewhere.  You can dump
 any preset model as an extended Williams model record using -d:
 
-	reveng -m crc-32 -d
+	reveng -m crc-32/iso-hdlc -d
 	width=32  poly=0x04c11db7  init=0xffffffff  refin=true
 	refout=true  xorout=0xffffffff  check=0xcbf43926
-	residue=0xdebb20e3  name="CRC-32"
+	residue=0xdebb20e3  name="CRC-32/ISO-HDLC"
 
 You can specify the parameters of the model instead:
 
@@ -168,7 +168,7 @@ You can specify the parameters of the model instead:
 
 This is equivalent to
 
-	reveng -m crc-32
+	reveng -m crc-32/iso-hdlc
 
 except the model will have no name when dumped.  (The -l switch sets
 both RefIn = True and RefOut = True.  To set RefOut separately, use
@@ -431,12 +431,12 @@ ignored.
 
 Among the simplest ways to control a CRC calculation is to find one such
 unused space that is both contiguous and large enough to hold a
-checksum.  For example, suppose we have an existing message with an X.25
+checksum.  For example, suppose we have an existing message with an SDLC
 CRC:
 
   0: 44 6F 67 73 2F 2A 12 34  2A 2F 72 6F 63 6B 4E 47 | Dogs/*.4*/rockNG
 
-Here, 4E 47 is the X.25 checksum, and we wish to alter the message
+Here, 4E 47 is the SDLC checksum, and we wish to alter the message
 without either changing the checksum or failing the CRC.  We notice that
 the 7th and 8th bytes can be replaced at will, and these can contain a
 calculated value to force the CRC.  Firstly we change the text as we
@@ -447,13 +447,13 @@ wish:
 Calculate the CRC of the part on the left of the unused space with
 XorOut = 0:
 
-	reveng -m x-25 -x 0 -c 436174732f2a
+	reveng -m crc-16/ibm-sdlc -x 0 -c 436174732f2a
 	9dc5
 
 Then reverse-calculate the CRC of the part on the right, including the
 old CRC, with Init = 0:
 
-	reveng -m x-25 -i 0 -v 2a2f72756c654e47
+	reveng -m crc-16/ibm-sdlc -i 0 -v 2a2f72756c654e47
 	1505
 
 Now exclusive-OR the two returned CRCs together, and insert the result
@@ -467,9 +467,9 @@ Our edited message now looks like this:
 
   0: 43 61 74 73 2F 2A 88 C0  2A 2F 72 75 6C 65 4E 47 | Cats/*.A*/ruleNG
 
-To confirm that it still passes the X.25 CRC:
+To confirm that it still passes the SDLC CRC:
 
-	reveng -m x-25 -c 436174732f2a88c02a2f72756c65
+	reveng -m crc-16/ibm-sdlc -c 436174732f2a88c02a2f72756c65
 	4e47
 
 For more flexible editing options, see Mark Adler's source file spoof.c
@@ -692,7 +692,8 @@ Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (25 July 2018).  "Catalogue of parametrised CRC algorithms".
+Cook, Greg (21 November 2018).  "Catalogue of parametrised CRC
+algorithms".
   <http://reveng.sourceforge.net/crc-catalogue/>
 
 Ewing, Gregory C. (March 2010). "Reverse-Engineering a CRC Algorithm".
