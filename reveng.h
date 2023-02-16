@@ -1,10 +1,10 @@
 /* reveng.h
- * Greg Cook, 7/Dec/2019
+ * Greg Cook, 24/Dec/2021
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
  * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019  Gregory Cook
+ * 2019, 2020, 2021  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -93,7 +93,7 @@
 /* Global definitions */
 
 /* CRC RevEng version string */
-#define VERSION "2.1.0"
+#define VERSION "2.1.2"
 
 /* bmpbit.c */
 typedef BMP_T bmp_t;
@@ -175,6 +175,7 @@ extern void pfree(poly_t *poly);
 extern void praloc(poly_t *poly, unsigned long length);
 extern int pmpar(const poly_t poly, const poly_t mask);
 extern int pident(const poly_t a, const poly_t b);
+extern int pcoeff(const poly_t poly, unsigned long idx);
 
 /* model.c */
 

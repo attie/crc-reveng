@@ -1,10 +1,10 @@
 #!/usr/bin/make
 # Mk.Win32
-# Greg Cook, 23/Feb/2019
+# Greg Cook, 24/Dec/2021
 
 # CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 # Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-# 2019  Gregory Cook
+# 2019, 2020, 2021  Gregory Cook
 #
 # This file is part of CRC RevEng.
 #
@@ -21,6 +21,8 @@
 # You should have received a copy of the GNU General Public License
 # along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
+# The bmptst and pretst invocations are Bourne shell command lines.
+SHELL = /bin/sh
 # C compiler and flags.  Adjust to taste.
 CC = gcc
 CFLAGS = -O3 -Wall -march=i586 -ansi -fomit-frame-pointer
@@ -71,6 +73,8 @@ BINS = bin/armtubeos/reveng \
 MACROS = -DPRESETS
 
 .PHONY: clean all
+
+.SUFFIXES:
 
 all: $(EXE)
 

@@ -1,6 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-2019  Gregory Cook
+2019, 2020, 2021  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -47,7 +47,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 107 currently listed models available as presets.
+algorithms", with the 108 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -60,7 +60,7 @@ hand.
 CRC RevEng is hosted by SourceForge, from where the latest version can
 be downloaded and documentation browsed:
 
-	<http://reveng.sourceforge.net/>
+	<https://reveng.sourceforge.io/>
 
 COMPILING
 
@@ -75,16 +75,51 @@ executable with version information and an icon:
 
 	make -f Mk.Win32
 
-In RISC OS, with the Acorn Desktop Development Environment (DDE)
-installed, click Menu on the file RISCOSify, and set its type to
-Obey.  Double-click Select first on RISCOSify, then on Mk/RISCOS.
-
 In non-ASCII compatible environments, the array aliases[] in file
 preset.c may need to be reordered to suit the local string collation
 order.  The correct order of models[] and aliases[] can be verified at
 compile time by the error-free completion of this command:
 
 	make clean pretst
+
+Some enterprise users may wish to disable the -F switch to minimise CPU
+usage.  To do this, define the macro ALWPCK in config.h or on the
+command line.
+
+				* * *
+
+In RISC OS, with the Acorn Desktop Development Environment (DDE)
+installed, click Menu on the file RISCOSify, and set its type to Obey.
+Double-click Select first on RISCOSify, then on Mk/RISCOS.
+Mk/RISCOS is compatible with both !Make and !AMU.
+
+Alternatively, install GCC4 (and optionally Bash) from the cloud using
+the package manager !PackMan.  Run RISCOSify as above, then press F12 or
+Ctrl+F12 to obtain a command prompt.  Navigate to the directory
+containing CRC RevEng by entering the filing system's command (SDFS, RAM
+etc.) and then the appropriate Dir command.  With Bash installed, enter
+the following:
+
+	Run <Packages$Apps>.Development.!GCC
+	Run <Packages$Apps>.Utilities.!Bash
+	WimpSlot -min 16000K
+	make -f Mk.ROSGCC
+
+Without Bash, you must validate the bitmap size definitions manually.
+Enter:
+
+	Run <Packages$Apps>.Development.!GCC
+	WimpSlot -min 16000K
+	make -f Mk.ROSGCC bmptst
+	Run bmptst
+	Show Sys$ReturnCode
+
+Ensure that bmptst produces no messages and that the value of
+Sys$ReturnCode is 0.  If all is well, continue with:
+
+	make -f Mk.ROSGCC
+
+				* * *
 
 Otherwise, enter commands similar to the following to compile CRC RevEng
 on any ANSI C compliant compiler:
@@ -101,10 +136,6 @@ The platform-independent method does not compile the preset models.  To
 compile them, you will need to edit the configuration options in
 config.h to suit your architecture.  Having done so, define the macro
 PRESETS in config.h and recompile as above.
-
-Some enterprise users may wish to disable the -F switch to minimise CPU
-usage.  To do this, define the macro ALWPCK in config.h or on the
-command line.
 
 SYNOPSIS
 
@@ -174,7 +205,7 @@ The options and switches for specifying a model are:
 		A hexadecimal digit string specifying the initial value
 		to set in the shift register before computing the CRC.
 	-k KPOLY
-		The generator polynomial (see -p), written in the
+		The generator polynomial (see -p POLY), written in the
 		hexadecimal, reversed-reciprocal notation found in
 		Philip Koopman's papers.  The highest-order term is
 		included and the lowest-order term is omitted, shifting
@@ -205,10 +236,10 @@ The options and switches for specifying a model are:
 		POLY is written in the hexadecimal, direct notation
 		found in MSB-first code.  The highest-order term is
 		omitted, thus 0x18005 is specified as 8005.
-		-p also sets the start of the range for polynomial range
-		searching, see -q.
+		-p POLY also sets the start of the range for polynomial
+		range searching, see -q QPOLY.
 	-P RPOLY
-		The generator polynomial (see -p), written in the
+		The generator polynomial (see -p POLY), written in the
 		hexadecimal, reversed notation found in LSB-first code.
 		The highest-order term is omitted before reversal, thus
 		0x18005 is specified as A001.  This automatically
@@ -252,23 +283,23 @@ string arguments printed one per line on standard output.
 When passing numerical arguments on the command line, each argument is
 conceptually divided into characters, each character consisting of one
 or more hexadecimal digits.  For each character, enough hex digits to
-specify it are read then a number of bits (specified by the -a option)
-are taken from the least significant end, reversed (if RefIn = True) and
+specify it are read then a number of bits (specified by -a BITS) are
+taken from the least significant end, reversed (if RefIn = True) and
 appended to the binary representation of the argument; any excess bits
-are discarded.  The -a option (q.v.) permits a number of useful
+are discarded.  The -a BITS option (q.v.) permits a number of useful
 representations of a given underlying binary sequence.
 
 When passing messages as files or as raw binary strings, the same
 division into characters applies; bytes of the message are read until
-enough bits have been collected, then the number of bits specified by -a
-are taken from the specified least significant end of the collection
-(see -y), reflected (if RefIn = True) and added to the binary
+enough bits have been collected, then the number of bits specified by
+-a BITS are taken from the specified least significant end of the
+collection (see -y), reflected (if RefIn = True) and added to the binary
 representation.
 
 When printing CRCs, the binary representation is again divided into
-characters (of size specified by the -A option), each of which is
-reversed (if RefOut = True) and printed with the minimum sufficient
-number of hex digits.
+characters (of size specified by -A OBITS), each of which is reversed
+(if RefOut = True) and printed with the minimum sufficient number of hex
+digits.
 
 Output model records conform to the Williams model set out in "A
 Painless Guide to CRC Error Detection Algorithms".  To recap, the model
@@ -277,7 +308,7 @@ of bit cells defined in the width parameter, and shifting from right to
 left.  The init parameter defines the settings of the bit cells at the
 start of each calculation, before reading the first message bit.  The
 refin parameter, if equal to false, specifies that the characters of the
-message (whose size is specified by -a) are read bit-by-bit, most
+message (whose size is specified by -a BITS) are read bit-by-bit, most
 significant bit (MSB) first; if equal to true, the characters are read
 bit-by-bit, least significant bit (LSB) first.  Each sampled message bit
 is then XORed with the bit being simultaneously shifted out of the
@@ -293,22 +324,22 @@ character-by-character, before presentation.  For the purpose of the
 definitions below, the reflection is performed before the division into
 characters, by swapping the content of each cell with that of the cell
 an equal distance from the opposite end of the register; the characters
-(size defined by -A) of CRCs output by -c and -v are then true images of
-parts of the reflected register, the character containing the original
-MSB always appearing first.  The xorout parameter defines the XOR value
-applied to the contents of the register after the last message bit has
-been read and after the optional reflection.  The check parameter
-defines the contents of the register after initialising, reading the
-UTF-8 string "123456789" (as 8-bit characters), optionally reflecting,
-and applying the final XOR.  The residue parameter defines the contents
-of the register after initialising, reading an error-free codeword and
-optionally reflecting the register (if refout=true), but not applying
-the final XOR.  This is mathematically equivalent to initialising the
-register with the xorout parameter, reflecting it as described (if
-refout=true), reading as many zero bits as there are cells in the
-register, and reflecting the result (if refin=true).  The residue of a
-crossed-endian model is calculated assuming that the characters of the
-received CRC are specially reflected before submitting the codeword.
+(size defined by -A OBITS) of CRCs output by -c and -v are then true
+images of parts of the reflected register, the character containing the
+original MSB always appearing first.  The xorout parameter defines the
+XOR value applied to the contents of the register after the last message
+bit has been read and after the optional reflection.  The check
+parameter defines the contents of the register after initialising,
+reading the UTF-8 string "123456789" (as 8-bit characters), optionally
+reflecting, and applying the final XOR.  The residue parameter defines
+the contents of the register after initialising, reading an error-free
+codeword and optionally reflecting the register (if refout=true), but
+not applying the final XOR.  This is mathematically equivalent to
+initialising the register with the xorout parameter, reflecting it as
+described (if refout=true), reading as many zero bits as there are cells
+in the register, and reflecting the result (if refin=true).  The residue
+of a crossed-endian model is calculated assuming that the characters of
+the received CRC are specially reflected before submitting the codeword.
 
 width is printed as a decimal integer.  poly, init, xorout, check and
 residue are true images of the shift register at various times, printed
@@ -375,8 +406,9 @@ and output:
 		Print uppercase hexadecimal characters.
 	-y
 		When reading binary messages from files or arguments,
-		and the -a option is more than 8, this option specifies
-		that the first byte of each character contains the LSB.
+		and the -a BITS option is more than 8, this option
+		specifies that the first byte of each character contains
+		the LSB.
 	-z
 		Arguments are raw binary strings; input binary messages
 		from the arguments.
@@ -403,9 +435,10 @@ Correspondingly, to obtain the same effect as -v using a model reversed
 by -V, the user must present the characters of his or her message, and
 process those of the returned CRC, in reverse order.
 
-Take care when the CRC width (-w) is not a multiple of the character
-width (-a).  If the result of a calculation is not what you expect, try
-selecting left-justification (with -t) or right-justification (with -r).
+Take care when the CRC width (-w WIDTH) is not a multiple of the
+character width (-a BITS).  If the result of a calculation is not what
+you expect, try selecting left-justification (with -t) or
+right-justification (with -r).
 
 The -c mode is, of course, useful for creating a checksum to append to a
 message so that the combination will pass a particular CRC check.  The
@@ -499,10 +532,11 @@ that algorithm.  In general at least four data points are needed, either
 as known parameters or as message-CRC pairs.  Extra data points help to
 eliminate false results and to confirm models that are found.
 
-Known parameters are specified using -w, -p, -i and -x (see SPECIFYING A
-MODEL above).  The width, -w, is a required parameter for all searches
-and counts as one of the data points.  The size of characters (words) in
-the protocol must also be known and set with -a if this is not 8 bits.
+Known parameters are specified using -w WIDTH, -p POLY, -i INIT and
+-x XOROUT (see SPECIFYING A MODEL above).  The width, -w WIDTH, is a
+required parameter for all searches and counts as one of the data
+points.  The size of characters (words) in the protocol must also be
+known and set with -a BITS if this is not 8 bits.
 
 The search function is selected with -s, and message-CRC pairs are given
 as arguments, each message and CRC combined into one argument.  There
@@ -631,8 +665,8 @@ The full list of search options is as follows:
 	-G
 		Skip the brute force search pass.  Ignored if a
 		generator polynomial has been specified, so that the
-		brute force search pass may return results on the
-		polynomial.
+		brute force search pass may (rapidly) return results on
+		the polynomial.
 	-p POLY
 		When followed by -q QPOLY, sets the start of the range
 		(inclusive) for polynomial range searching.  POLY is
@@ -660,9 +694,9 @@ CRC RevEng provides a few additional options for convenience:
 
 	-e
 		Echo arguments to standard output.  Useful to check that
-		files are being read correctly and, together with -a,
-		-A, -b, -B, -l, -L, -r, -S, -t, -X and -y, to reformat
-		argument strings.
+		files are being read correctly and, together with
+		-a BITS, -A OBITS, -b, -B, -l, -L, -r, -S, -t, -X and
+		-y, to reformat argument strings.
 		The Init value is exclusive-ORed with the beginning of
 		each argument, so that when the argument is not a whole
 		number of bytes long, an equivalent string can be
@@ -715,9 +749,9 @@ Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (19 April 2019).  "Catalogue of parametrised CRC
+Cook, Greg (24 December 2021).  "Catalogue of parametrised CRC
 algorithms".
-  <http://reveng.sourceforge.net/crc-catalogue/>
+  <https://reveng.sourceforge.io/crc-catalogue/>
 
 Ewing, Gregory C. (March 2010). "Reverse-Engineering a CRC Algorithm".
 Christchurch: University of Canterbury.

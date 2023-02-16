@@ -1,5 +1,5 @@
 #!/usr/bin/make
-# Makefile
+# Mk/ROSGCC
 # Greg Cook, 24/Dec/2021
 
 # CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,13 +22,17 @@
 # along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 # The bmptst and pretst invocations are Bourne shell command lines.
-SHELL = /bin/sh
+# The RISC OS port of GNU Make needs this line (and Bash installed).
+# Setting UnixEnv$SHELL does no good.
+SHELL = <Bash$$Dir>.bash
+
 # C compiler and flags.  Adjust to taste.
 CC = gcc
-CFLAGS = -O3 -Wall -ansi -fomit-frame-pointer
-# Binary optimiser
-STRIP = strip
-SFLAGS = --strip-unneeded
+# In RISC OS, -mlibscl gets GCC to emit an AIF executable (file type
+# &FF8) requiring only the Shared C Library, instead of ELF (&E1F) which
+# needs the SharedLibs package installed to run.
+CFLAGS = -O3 -Wall -ansi -fomit-frame-pointer -mlibscl
+
 # Shell commands
 RM = rm
 TOUCH = touch
@@ -39,7 +43,7 @@ EXT = .exe
 # Target executable
 EXE = reveng
 # Target objects
-TARGETS = bmpbit.o cli.o model.o poly.o preset.o reveng.o
+TARGETS = bmpbit.o cli.o model.o poly.o preset.o reveng.o getopt.o
 # Header files
 HEADERS = config.h reveng.h
 # Pre-compiled executables and generated files
@@ -78,7 +82,6 @@ all: $(EXE)
 $(EXE): $(TARGETS)
 	$(MAKE) bmptst
 	$(CC) $(CFLAGS) -o $@ $+
-	-$(STRIP) $(SFLAGS) $@ $@$(EXT)
 
 %.o: %.c $(HEADERS) bmptst
 	$(CC) $(CFLAGS) $(MACROS) -c $<

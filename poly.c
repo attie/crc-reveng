@@ -1,10 +1,10 @@
 /* poly.c
- * Greg Cook, 7/Nov/2019
+ * Greg Cook, 24/Dec/2021
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
  * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019  Gregory Cook
+ * 2019, 2020  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2019-11-07: reviewed poly class defs and function entry conditions
+/* 2021-12-24: added pcoeff()
+ * 2019-11-07: reviewed poly class defs and function entry conditions
  * 2019-04-29: added quotient argument to pcrc(), pmod()
  * 2017-11-28: added braces, redundant statement skipped in prev()
  * 2016-06-27: pcmp() shortcut returns 0 when pointers identical
@@ -75,7 +76,7 @@
  * bit, at position (length - 1), is one.
  *
  * NORMALISED poly_t objects are SEMI-NORMALISED objects in which the
- * first bit, at position 0 is one.
+ * first bit, at position 0, is one.
  *
  * pfree() should be called on every poly_t object (including
  * those returned by functions) after its last use.
@@ -139,7 +140,7 @@ filtop(FILE *input, unsigned long length, int flags, int bperhx) {
 	 * bits are taken, reflected (if P_REFIN) and appended to the
 	 * result, then more characters are read.  The maximum number of
 	 * characters read is
-	 *   floor(length / bperhx) * ceil(bperhx / * CHAR_BIT).
+	 *   floor(length / bperhx) * ceil(bperhx / CHAR_BIT).
 	 * The returned poly_t is CLEAN.
 	 */
 
@@ -1163,6 +1164,14 @@ pident(const poly_t a, const poly_t b) {
 	 * a and b may or may not be CLEAN.
 	 */
 	return(a.length == b.length && a.bitmap == b.bitmap);
+}
+
+int
+pcoeff(const poly_t poly, unsigned long idx) {
+	/* Return bit at offset idx.
+	 * Poly may or may not be CLEAN.
+	 */
+	return((int) (getwrd(poly, idx) & BMP_C(1)));
 }
 
 /* Private functions */

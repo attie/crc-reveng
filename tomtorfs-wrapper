@@ -1,10 +1,10 @@
 #!/bin/sh
 # tomtorfs-wrapper
-# Greg Cook, 20/Nov/2019
+# Greg Cook, 24/Dec/2021
 
 # CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 # Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-# 2019  Gregory Cook
+# 2019, 2020, 2021  Gregory Cook
 #
 # This file is part of CRC RevEng.
 #
@@ -38,14 +38,14 @@
 #
 # Translates the tomtorfs command to the equivalent CRC RevEng command
 # and executes it, calculating a CRC on the contents of FILE.
-# If invoked as 'tomtorfs-wrapper', prints the equivalent reveng command
-# line to standard error before execution.
+# If invoked as 'tomtorfs-wrapper', prints the equivalent CRC RevEng
+# command line to standard error before execution.
 # For information on the arguments and their meanings, study the
 # translated command lines with reference to the CRC RevEng user guide.
 #
 # REFERENCES:
 # Greg Cook, CRC RevEng user guide.
-#   <http://reveng.sourceforge.net/readme.htm>
+#   <https://reveng.sourceforge.io/readme.htm>
 # Lammert Bies, "Error detection and correction" Web forum.
 #   <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 # Tom Torfs, IOCCC winning entry, 1998, CRC generator.

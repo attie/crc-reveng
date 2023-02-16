@@ -1,9 +1,9 @@
 | RISCOSify
-| Greg Cook, 21/Nov/2019
+| Greg Cook, 24/Dec/2021
 
 | CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 | Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-| 2019  Gregory Cook
+| 2019, 2020, 2021  Gregory Cook
 |
 | This file is part of CRC RevEng.
 |
@@ -23,9 +23,11 @@
 | This is a RISC OS Obeyfile.
 
 | Set the type of RISCOSify to Obey, and run RISCOSify, before using
-| Mk/ARMTube or Mk/RISCOS.
+| Mk/ARMTube, Mk/RISCOS or Mk/ROSGCC.
 
 Set CRCRevEng$Dir <Obey$Dir>
+IfThere <CRCRevEng$Dir>.bin.armtubeos.chafix Then SetType <CRCRevEng$Dir>.bin.armtubeos.chafix &FFD
+IfThere <CRCRevEng$Dir>.bin.armtubeos.chafix/inf Then SetType <CRCRevEng$Dir>.bin.armtubeos.chafix/inf &FFF
 IfThere <CRCRevEng$Dir>.bin.armtubeos.dfsfix Then SetType <CRCRevEng$Dir>.bin.armtubeos.dfsfix &FFD
 IfThere <CRCRevEng$Dir>.bin.armtubeos.dfsfix/inf Then SetType <CRCRevEng$Dir>.bin.armtubeos.dfsfix/inf &FFF
 IfThere <CRCRevEng$Dir>.bin.armtubeos.dfsfix/txt Then SetType <CRCRevEng$Dir>.bin.armtubeos.dfsfix/txt &FFE
@@ -59,6 +61,7 @@ IfThere <CRCRevEng$Dir>.COPYING Then SetType <CRCRevEng$Dir>.COPYING &FFF
 IfThere <CRCRevEng$Dir>.Makefile Then SetType <CRCRevEng$Dir>.Makefile &FE1
 IfThere <CRCRevEng$Dir>.Mk/ARMTube Then SetType <CRCRevEng$Dir>.Mk/ARMTube &FE1
 IfThere <CRCRevEng$Dir>.Mk/RISCOS Then SetType <CRCRevEng$Dir>.Mk/RISCOS &FE1
+IfThere <CRCRevEng$Dir>.Mk/ROSGCC Then SetType <CRCRevEng$Dir>.Mk/ROSGCC &FE1
 IfThere <CRCRevEng$Dir>.Mk/Win32 Then SetType <CRCRevEng$Dir>.Mk/Win32 &FE1
 IfThere <CRCRevEng$Dir>.model/c Then SetType <CRCRevEng$Dir>.model/c &FFF
 IfThere <CRCRevEng$Dir>.poly/c Then SetType <CRCRevEng$Dir>.poly/c &FFF

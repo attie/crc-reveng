@@ -1,6 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-2019  Gregory Cook
+2019, 2020, 2021  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -19,6 +19,13 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+2.1.2	24 December 2021
+	* Added algorithm CRC-8/HITAG from the CRC Catalogue.
+
+2.1.1	14 August 2020
+	* Updated project URL.
+	* Added Chafix utility for ARM Tube OS binary.
+
 2.1.0	7 December 2019
 	* Added -1 switch to skip equivalent forms.
 	* WIDTH may be specified before or after -i, -p, -q or -x.
@@ -29,7 +36,7 @@ Revision history of CRC RevEng
 	* Added tomtorfs-wrapper.
 	* Revised poly class definitions and function entry conditions
 	  in poly.c.
-	* Added DFSFIX utility for ARM Tube OS binary.
+	* Added DFSfix utility for ARM Tube OS binary.
 
 2.0.2	2 November 2019
 	* The memory allocation expands geometrically while reading

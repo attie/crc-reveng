@@ -1,10 +1,10 @@
 /* cli.c
- * Greg Cook, 8/Dec/2019
+ * Greg Cook, 24/Dec/2021
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
  * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019  Gregory Cook
+ * 2019, 2020, 2021  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2019-12-07: -impqwx in any order; warn if LSB of poly unset
+/* 2020-08-14: changed project URL
+ * 2019-12-07: -impqwx in any order; warn if LSB of poly unset
  * 2019-11-01: initialize optind, opterr
  * 2019-11-01: grow poly geometrically in rdpoly()
  * 2019-03-24: error message also requests -P before -s
@@ -222,19 +223,12 @@ ipqx:
 				*pptr = strtop(optarg, 0, 4);
 				mnovel(&model);
 				/* warn user if bottom bit of poly unset */
-				if(c == 'p' && plen(model.spoly)) {
-					apoly = psubs(model.spoly, 0UL,
-						plen(model.spoly)-1UL,
-						plen(model.spoly), 0UL);
-					if(ptst(apoly)) {
-						pfree(&apoly);
-					} else {
-						fprintf(stderr, "%s: warning: "
-							"POLY has no +1 term; "
-							"did you mean -P %s?\n",
-							myname, optarg);
-						pfree(&apoly);
-					}
+				if(c == 'p' && plen(model.spoly)
+					&& !pcoeff(model.spoly, plen(model.spoly) - 1UL)) {
+					fprintf(stderr, "%s: warning: "
+						"POLY has no +1 term; "
+						"did you mean -P %s?\n",
+						myname, optarg);
 				}
 				break;
 			case 'q': /* q: range end polynomial */
@@ -415,7 +409,7 @@ ipqx:
 				fprintf(stderr, "%s: warning: you have "
 					"only given %d sample%s\n",
 					myname, args,
-				       	(args == 1) ? "" : "s");
+					(args == 1) ? "" : "s");
 				fprintf(stderr, "%s: warning: to reduce "
 					"false positives, give %d or "
 					"more samples\n", myname, RECSMP);
@@ -577,19 +571,19 @@ rdpoly(const char *name, int flags, int bperhx) {
 	while(!feof(input) && !ferror(input)) {
 		chunk = filtop(input, BUFFER, flags, bperhx);
 		total += plen(chunk);
-		if((a = b = total) > plen(apoly)) {
+		if((b = total) > plen(apoly)) {
 			/* Grow apoly geometrically */
 			/* Find a = power of two not greater than total */
-			/* total > 0 */
-			while(b) {
+			/* b = total > 0 */
+			do {
 				a = b;
 				b &= (b - 1UL);
-			}
+			} while(b);
 			/* 0 < a <= total */
 			/* Add quanta to a until it equals or exceeds total */
 			if(!(b = a >> GSCALE))
-				b = 1UL;
-			while(a < total)
+				a = total;
+			else while(a < total)
 				a += b;
 			/* Allocate a bits to apoly */
 			praloc(&apoly, a);
@@ -669,11 +663,11 @@ usage(void) {
 			"\t-s search for algorithm\t\t-v calculate reversed CRCs\n"
 			"\t-h | -u | -? show this help\n"
 			"\n"
-			"Copyright (C)\n"
-			"2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019  Gregory Cook\n"
+			"Copyright (C) 2010, 2011, 2012, 2013, 2014,\n"
+			"\t\t    2015, 2016, 2017, 2018, 2019, 2020, 2021  Gregory Cook\n"
 			"This is free software; see the source for copying conditions.  There is NO\n"
 			"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 			"Version "
 			VERSION
-			"\t\t\t\t  <http://reveng.sourceforge.net/>\n");
+			"\t\t\t\t  <https://reveng.sourceforge.io/>\n");
 }
