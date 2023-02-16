@@ -1,7 +1,7 @@
 | RISCOSify
-| Greg Cook, 24/Feb/2016
+| Greg Cook, 27/Jun/2016
 
-| CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
+| CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 | Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 |
 | This file is part of CRC RevEng.
@@ -17,7 +17,7 @@
 | GNU General Public License for more details.
 |
 | You should have received a copy of the GNU General Public License
-| along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
+| along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 | This is a RISC OS Obeyfile.
 
@@ -53,6 +53,7 @@ IfThere <CRCRevEng$Dir>.COPYING Then SetType <CRCRevEng$Dir>.COPYING &FFF
 IfThere <CRCRevEng$Dir>.Makefile Then SetType <CRCRevEng$Dir>.Makefile &FE1
 IfThere <CRCRevEng$Dir>.Mk/ARMTube Then SetType <CRCRevEng$Dir>.Mk/ARMTube &FE1
 IfThere <CRCRevEng$Dir>.Mk/RISCOS Then SetType <CRCRevEng$Dir>.Mk/RISCOS &FE1
+IfThere <CRCRevEng$Dir>.Mk/Win32 Then SetType <CRCRevEng$Dir>.Mk/Win32 &FE1
 IfThere <CRCRevEng$Dir>.model/c Then SetType <CRCRevEng$Dir>.model/c &FFF
 IfThere <CRCRevEng$Dir>.poly/c Then SetType <CRCRevEng$Dir>.poly/c &FFF
 IfThere <CRCRevEng$Dir>.preset/c Then SetType <CRCRevEng$Dir>.preset/c &FFF
@@ -60,6 +61,8 @@ IfThere <CRCRevEng$Dir>.README Then SetType <CRCRevEng$Dir>.README &FFF
 IfThere <CRCRevEng$Dir>.relink/pl Then SetType <CRCRevEng$Dir>.relink/pl &102
 IfThere <CRCRevEng$Dir>.reveng/c Then SetType <CRCRevEng$Dir>.reveng/c &FFF
 IfThere <CRCRevEng$Dir>.reveng/h Then SetType <CRCRevEng$Dir>.reveng/h &FFF
+IfThere <CRCRevEng$Dir>.reveng/ico Then SetType <CRCRevEng$Dir>.reveng/ico &132
+IfThere <CRCRevEng$Dir>.reveng/rc Then SetType <CRCRevEng$Dir>.reveng/rc &FFF
 CDir <CRCRevEng$Dir>.c
 CDir <CRCRevEng$Dir>.h
 CDir <CRCRevEng$Dir>.o

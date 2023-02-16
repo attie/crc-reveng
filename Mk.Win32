@@ -1,5 +1,5 @@
 #!/usr/bin/make
-# Makefile
+# Mk.Win32
 # Greg Cook, 26/Jul/2016
 
 # CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,10 +22,13 @@
 
 # C compiler and flags.  Adjust to taste.
 CC = gcc
-CFLAGS = -O3 -Wall -ansi -fomit-frame-pointer
+CFLAGS = -O3 -Wall -march=i586 -ansi -fomit-frame-pointer
 # Binary optimiser
 STRIP = strip
 SFLAGS = --strip-unneeded
+# Windows resource compiler
+WINDRES = windres
+WFLAGS = -O coff
 # Shell commands
 RM = rm
 TOUCH = touch
@@ -36,7 +39,7 @@ EXT = .exe
 # Target executable
 EXE = reveng
 # Target objects
-TARGETS = bmpbit.o cli.o model.o poly.o preset.o reveng.o
+TARGETS = bmpbit.o cli.o model.o poly.o preset.o reveng.o reveng.res
 # Header files
 HEADERS = config.h reveng.h
 # Pre-compiled executables and generated files
@@ -77,6 +80,9 @@ $(EXE): $(TARGETS)
 
 %.o: %.c $(HEADERS) bmptst
 	$(CC) $(CFLAGS) $(MACROS) -c $<
+
+%.res: %.rc
+	$(WINDRES) $(WFLAGS) -o $@ $<
 
 bmptst: bmpbit.c $(HEADERS)
 	$(CC) $(CFLAGS) $(MACROS) -DBMPTST -o $@ $<

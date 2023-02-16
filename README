@@ -1,4 +1,4 @@
-CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
+CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 
 This file is part of CRC RevEng.
@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
+along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 THIRD-PARTY SOFTWARE
 
@@ -46,7 +46,7 @@ with (that is, it incorporates) the RISC OS Shared C Library.
 CLib qualifies as a "System Library" and GPLv3 permits licensees to
 "combine GPLed software with GPL-incompatible System Libraries, [...]
 and distribute them both together."  See Sections 1, 5 and 6 and A Quick
-Guide to GPLv3, <http://www.gnu.org/licenses/quick-guide-gplv3.html>
+Guide to GPLv3, <https://www.gnu.org/licenses/quick-guide-gplv3.html>
 The patch is an independent program and is not bound by GPLv3 by mere
 inclusion.  See Section 5.
 
@@ -57,7 +57,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 83 currently listed models available as presets.
+algorithms", with the 90 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -79,6 +79,11 @@ and Raspbian environments, simply cd to the directory containing the
 source files, and enter
 
 	make
+
+A special makefile can also be used in MinGW to make a Windows
+executable with version information and an icon:
+
+	make -f Mk.Win32
 
 In RISC OS, with the Acorn Desktop Development Environment (DDE)
 installed, click Menu on the file RISCOSify, and set its type to
@@ -117,7 +122,7 @@ Options:
 	-k KPOLY	generator in Koopman notation (implies WIDTH)
 	-m MODEL	preset CRC algorithm
 	-p POLY		generator or search range start polynomial
-	-P RPOLY	reversed generator polynomial
+	-P RPOLY	reversed generator polynomial (implies WIDTH)
 	-q QPOLY	search range end polynomial
 	-w WIDTH	register size, in bits
 	-x XOROUT	final register XOR value
@@ -170,7 +175,8 @@ The options and switches for specifying a model are:
 	-i INIT
 		A hexadecimal digit string specifying the initial value
 		to set in the shift register before computing the CRC.
-		The width must be specified with -k, -m or -w before -i.
+		The width must be specified with -k, -m, -P or -w
+		before -i.
 	-k KPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed-reciprocal notation found in
@@ -204,13 +210,14 @@ The options and switches for specifying a model are:
 		omitted, thus 0x18005 is specified as 8005.
 		-p also sets the start of the range for polynomial range
 		searching, see -q.
-		The width must be specified with -k, -m or -w before -p.
+		The width must be specified with -k, -m, -P or -w
+		before -p.
 	-P RPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed notation found in LSB-first code.
 		The highest-order term is omitted before reversal, thus
-		0x18005 is specified as A001.
-		The width must be specified with -k, -m or -w before -P.
+		0x18005 is specified as A001.  This automatically
+		provides the Width value.
 	-V
 		Reverse the current model.  If RefOut = True, the Init
 		value is reversed otherwise the XorOut value is
@@ -224,7 +231,8 @@ The options and switches for specifying a model are:
 	-x XOROUT
 		A hexadecimal digit string specifying the value to be
 		added to the final shift register value before output.
-		The width must be specified with -k, -m or -w before -x.
+		The width must be specified with -k, -m, -P or -w
+		before -x.
 
 Other model-related options:
 
@@ -277,7 +285,7 @@ and output:
 		selected by -f or -z, otherwise messages are numerical
 		arguments.  Particular values of BITS cause the input to
 		be interpreted as a sequence of:
-		-a 16   16-bit words, raw or as quartets of hex digits.
+		-a 16	16-bit words, raw or as quartets of hex digits.
 			When RefIn or RefOut are True, this is
 			equivalent to swapping the bytes of each pair
 			before input to an 8-bit calculator.
@@ -513,11 +521,11 @@ efficient algorithm.
 For example, to split a 32-bit search into four processes:
 
 	reveng -w 32 -q 40000000 -s c98964f6b9 a5fa49f2fd 13370aee7df0
-	reveng -w 32 -p 40000000 -q 80000000
+	reveng -w 32 -p 40000000 -q 80000000 \
 		-s c98964f6b9 a5fa49f2fd 13370aee7df0
-	reveng -w 32 -p 80000000 -q c0000000
+	reveng -w 32 -p 80000000 -q c0000000 \
 		-s c98964f6b9 a5fa49f2fd 13370aee7df0
-	reveng -w 32 -p c0000000 -q 0
+	reveng -w 32 -p c0000000 -q 0 \
 		-s c98964f6b9 a5fa49f2fd 13370aee7df0
 
 To continue an interrupted search:
@@ -525,7 +533,7 @@ NB: If an either-endian search is stopped while RefIn/RefOut = False
 then it takes two further command lines to complete the search: one
 big-endian range search, and one little-endian full search.
 
-	reveng -w 32 -p 50000001 -q 0 -b
+	reveng -w 32 -p 50000001 -q 0 -b \
 		-s c98964f6b9 a5fa49f2fd 13370aee7df0
 	reveng -w 32 -l -s c98964f6b9 a5fa49f2fd 13370aee7df0
 
@@ -580,7 +588,6 @@ SEARCH EXAMPLES
 	reveng -w 16 -l -F -s 31816b 32c16a 31326a0a
 	reveng -w 32 -p 04c11db7 -l -s c98964f6b9 a5fa49f2fd 13370aee7df0
 	reveng -w 32 -l -s c98964f6b9 a5fa49f2fd 13370aee7df0
-		(may take over an hour)
 
 A comprehensive list is being compiled.
 
@@ -603,7 +610,7 @@ catalogue.
 
 REFERENCES
 
-Adler, Mark (24 December 2014). "zlib Home Site" (section "CRC (Cyclic
+Adler, Mark (13 May 2016). "zlib Home Site" (section "CRC (Cyclic
 Redundancy Check) Bonus Information").  Contains links to spoof.c.gz and
 crcany.tar.gz.
   <http://zlib.net/>
@@ -612,13 +619,12 @@ Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <http://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (24 February 2016).  "Catalogue of parametrised CRC
-algorithms".
+Cook, Greg (27 July 2016).  "Catalogue of parametrised CRC algorithms".
   <http://reveng.sourceforge.net/crc-catalogue/>
 
 Ewing, Gregory C. (March 2010). "Reverse-Engineering a CRC Algorithm".
 Christchurch: University of Canterbury.
-  <http://www.cosc.canterbury.ac.nz/greg.ewing/essays/
+  <https://www.cosc.canterbury.ac.nz/greg.ewing/essays/
     CRC-Reverse-Engineering.html>
 
 Koopman, Philip (July 2002).  "32-Bit Cyclic Redundancy Codes for
@@ -637,14 +643,14 @@ doi:10.1109/DSN.2004.1311885.
   <https://users.ece.cmu.edu/~koopman/roses/dsn04/
     koopman04_crc_poly_embedded.pdf>
 
-Pircher, Thomas (4 December 2014). pycrc. Python based parametrised CRC
+Pircher, Thomas (19 March 2016). pycrc. Python based parametrised CRC
 calculator and C code generator.
-  <http://www.tty1.net/pycrc/>
+  <https://pycrc.org/>
 
 Stigge, Martin; Ploetz, Henryk; Mueller, Wolf; Redlich, Jens-Peter
 (May 2006).  "Reversing CRC -- Theory and Practice".  Berlin: Humboldt
 University Berlin.
-  <http://sar.informatik.hu-berlin.de/research/publications/
+  <https://sar.informatik.hu-berlin.de/research/publications/
     SAR-PR-2006-05/SAR-PR-2006-05_.pdf>
 
 Williams, Ross N. (24 September 1996). "A Painless Guide to CRC Error
