@@ -1,8 +1,8 @@
 | RISCOSify
-| Greg Cook, 31/Jul/2015
+| Greg Cook, 24/Feb/2016
 
 | CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-| Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
+| Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 |
 | This file is part of CRC RevEng.
 |
@@ -55,6 +55,7 @@ IfThere <CRCRevEng$Dir>.Mk/ARMTube Then SetType <CRCRevEng$Dir>.Mk/ARMTube &FE1
 IfThere <CRCRevEng$Dir>.Mk/RISCOS Then SetType <CRCRevEng$Dir>.Mk/RISCOS &FE1
 IfThere <CRCRevEng$Dir>.model/c Then SetType <CRCRevEng$Dir>.model/c &FFF
 IfThere <CRCRevEng$Dir>.poly/c Then SetType <CRCRevEng$Dir>.poly/c &FFF
+IfThere <CRCRevEng$Dir>.preset/c Then SetType <CRCRevEng$Dir>.preset/c &FFF
 IfThere <CRCRevEng$Dir>.README Then SetType <CRCRevEng$Dir>.README &FFF
 IfThere <CRCRevEng$Dir>.relink/pl Then SetType <CRCRevEng$Dir>.relink/pl &102
 IfThere <CRCRevEng$Dir>.reveng/c Then SetType <CRCRevEng$Dir>.reveng/c &FFF
@@ -69,6 +70,7 @@ IfThere <CRCRevEng$Dir>.contrib.getopt/c Then Copy <CRCRevEng$Dir>.contrib.getop
 IfThere <CRCRevEng$Dir>.contrib.getopt/h Then Copy <CRCRevEng$Dir>.contrib.getopt/h <CRCRevEng$Dir>.h.getopt ~CD~V
 IfThere <CRCRevEng$Dir>.model/c Then Copy <CRCRevEng$Dir>.model/c <CRCRevEng$Dir>.c.model ~CD~V
 IfThere <CRCRevEng$Dir>.poly/c Then Copy <CRCRevEng$Dir>.poly/c <CRCRevEng$Dir>.c.poly ~CD~V
+IfThere <CRCRevEng$Dir>.preset/c Then Copy <CRCRevEng$Dir>.preset/c <CRCRevEng$Dir>.c.preset ~CD~V
 IfThere <CRCRevEng$Dir>.reveng/c Then Copy <CRCRevEng$Dir>.reveng/c <CRCRevEng$Dir>.c.reveng ~CD~V
 IfThere <CRCRevEng$Dir>.reveng/h Then Copy <CRCRevEng$Dir>.reveng/h <CRCRevEng$Dir>.h.reveng ~CD~V
 IfThere <CRCRevEng$Dir>.RISCOSify Then SetType <CRCRevEng$Dir>.RISCOSify &FEB

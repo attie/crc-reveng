@@ -1,9 +1,9 @@
 #!/usr/bin/make
 # Makefile
-# Greg Cook, 9/Apr/2015
+# Greg Cook, 24/Feb/2016
 
 # CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
+# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 #
 # This file is part of CRC RevEng.
 #
@@ -36,7 +36,7 @@ EXT = .exe
 # Target executable
 EXE = reveng
 # Target objects
-TARGETS = bmpbit.o cli.o model.o poly.o reveng.o
+TARGETS = bmpbit.o cli.o model.o poly.o preset.o reveng.o
 # Header files
 HEADERS = config.h reveng.h
 # Pre-compiled executables and generated files

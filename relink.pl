@@ -1,9 +1,9 @@
-#!/usr/bin/perl -pi.bak
+#!/usr/bin/perl -i.bak
 # relink.pl
-# Greg Cook, 29/Jul/2015
+# Greg Cook, 24/Feb/2016
 
 # CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
+# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 #
 # This file is part of CRC RevEng.
 #
@@ -22,27 +22,51 @@
 
 # Renumbers and relinks the elements of b32[], models[] and aliases[]
 # and generates initialising code for the large polynomial bitmaps
-# in file models.c of CRC RevEng, to permit adding or deleting presets.
+# in file preset.c of CRC RevEng, to permit adding or deleting presets.
 # New elements can be referenced by a new alphanumeric tag wherever the
-# index number is to appear.
+# index number is to appear.  A string constant in place of an alias
+# reference in models[] is converted to a reference to the alias with
+# a matching name.
 
-# Usage: perl relink.pl model.c
-# (renames original to model.c.bak)
+# Usage: perl relink.pl preset.c
+# (renames original to preset.c.bak)
 
 use integer;
 
-if(m|/\*\s*CONSTANT\s+(\w+)\s*=\s*\((\d+)\s*,\s*((?:0x)?[0-9a-fA-F]+)\)\s*\*/|) {push @{$hash{$2}},$1,$3;}
-if(m|/\*\s*END AUTO-GENERATED CONSTANTS\s*\*/|) {&bigbmp(\%hash); undef %hash; $blank = 0;}
-if($blank) {$_ = "";}
-if(m|/\*\s*BEGIN AUTO-GENERATED CONSTANTS\s*\*/|) {$blank = 1;}
+until(($_ = <>) =~ /(?:aliases\+\s*\w+|\"[A-Z0-9\/-]+\")\s*},\s+\/\*\s*\w+\s*\*\//) {
+	if(m|/\*\s*CONSTANT\s+(\w+)\s*=\s*\((\d+)\s*,\s*((?:0x)?[0-9a-fA-F]+)\)\s*\*/|) {push @{$hash{$2}},$1,$3;}
+	if(s/(^\s+BMP_C\(0x[0-9A-Fa-f]{8}\) << \(BMP_BIT - 32\),\s+\/\*)\s*(\w+)(.*$)/sprintf("%s%4d%s",$1,$x,$3)/e) {$x{$2} = $x++ || "0";}
+	if(m|/\*\s*END AUTO-GENERATED CONSTANTS\s*\*/|) {&bigbmp(\%hash); undef %hash; $blank = 0;}
+	unless($blank) {print $_;}
+	if(m|/\*\s*BEGIN AUTO-GENERATED CONSTANTS\s*\*/|) {$blank = 1;}
+}
 
-if(s/(^\s+BMP_C\(0x[0-9A-Fa-f]{8}\) << \(BMP_BIT - 32\),\s+\/\*)\s*(\w+)(.*$)/sprintf("%s%4d%s",$1,$x,$3)/e) {$x{$2} = $x++ || "0";}
-s/b32\+\s*(\w+)/sprintf("b32+%3d",$x{$1})/eg;
-if(s/\"([A-Z0-9\/-]+)(\"\s*},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("\"%s%s%3d%s",$1,$2,$y,$4)/e){$y{$3} = $y++ || "0";}
-s/models\+\s*(\w+)/sprintf("models+%2d",$y{$1})/eg;
-if(s/(,\s+models\+[\d ]\d},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%4d%s",$1,$z,$3)/e){$z{$2} = $z++ || "0";}
-s/(^\#\s*define\s+NPRESETS\s+)[1-9][0-9]*/$1$y/;
-s/(^\#\s*define\s+NALIASES\s+)[1-9][0-9]*/$1$z/;
+do {
+	s/b32\+\s*(\w+)/sprintf("b32+%3d",$x{$1})/eg;
+	if(s/(aliases\+\s*\w+|\"[A-Z0-9\/-]+\")(\s*},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%s%3d%s",$1,$2,$y,$4)/e){$y{$3} = $y++ || "0";}
+	push(@models,$_);
+} until(($_ = <>) =~ /(^\#\s*define\s+NPRESETS\s+)[1-9][0-9]*/);
+
+do {
+	s/(^\#\s*define\s+NPRESETS\s+)[1-9][0-9]*/$1$y/;
+	s/models\+\s*(\w+)/sprintf("models+%2d",$y{$1})/e;
+	if(s/(,\s+models\+[\d ]\d},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%4d%s",$1,$z,$3)/e){$z{$2} = $z++ || "0";}
+	if(/(\"[^"]+\")\s*,\s+models\+[\d ]\d},\s+\/\*\s*\w+\s*\*\//){$z{$1} = $z - 1;}
+	push(@aliases,$_);
+} until(($_ = <>) =~ /(^\#\s*define\s+NALIASES\s+)[1-9][0-9]*/);
+
+while(defined(($model = shift(@models)))) {
+	$model =~ s/aliases\+\s*(\w+)/sprintf("aliases+%3d",$z{$1})/e;
+	$model =~ s/(,\s+)(\"[^"]+\")\s*/sprintf("%saliases+%3d",$1,$z{$2})/e;
+	print $model;
+}
+
+print(@aliases);
+
+do {
+	s/(^\#\s*define\s+NALIASES\s+)[1-9][0-9]*/$1$z/;
+	print $_;
+} while(defined(($_ = <>)));
 
 sub bigbmp (\%) {
   my ($hr) = @_;

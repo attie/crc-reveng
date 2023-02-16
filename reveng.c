@@ -1,9 +1,9 @@
 /* reveng.c
- * Greg Cook, 9/Apr/2015
+ * Greg Cook, 24/Feb/2016
  */
 
 /* CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -329,12 +329,12 @@ engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, c
 			/* Toggle each zero row with carry, for next iteration */
 			if(cy) {
 			       if(pident(*jptr, pzero)) {
-				       /* 0 to 1, no carry */
-				       *jptr = bpoly;
-				       cy = 0;
+					/* 0 to 1, no carry */
+					*jptr = bpoly;
+					cy = 0;
 			       } else if(pident(*jptr, bpoly)) {
-				       /* 1 to 0, carry forward */
-				       *jptr = pzero;
+					/* 1 to 0, carry forward */
+					*jptr = pzero;
 			       }
 			}
 		}

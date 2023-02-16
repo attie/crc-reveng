@@ -1,5 +1,5 @@
 CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -42,7 +42,7 @@ supplied with the RISC OS binary under licence from Castle Technology
 Limited for distribution to end users for the purpose of upgrading, if
 required.  These are found in the bin/riscos/ directory.  The ARM Tube
 OS binary, located in the bin/armtubeos/ directory, is statically linked
-with (that is, incorporates) the RISC OS Shared C Library.
+with (that is, it incorporates) the RISC OS Shared C Library.
 CLib qualifies as a "System Library" and GPLv3 permits licensees to
 "combine GPLed software with GPL-incompatible System Libraries, [...]
 and distribute them both together."  See Sections 1, 5 and 6 and A Quick
@@ -57,7 +57,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 72 currently listed models available as presets.
+algorithms", with the 83 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -87,8 +87,13 @@ Obey.  Double-click Select first on RISCOSify, then on Mk/RISCOS.
 Otherwise, enter commands similar to the following to compile CRC RevEng
 on any ANSI C compliant compiler:
 
-	gcc -O3 -Wall -ansi -c bmpbit.c cli.c model.c poly.c reveng.c
-	gcc -o reveng bmpbit.o cli.o model.o poly.o reveng.o
+	gcc -O3 -Wall -ansi -c bmpbit.c cli.c model.c poly.c preset.c \
+		reveng.c
+	cd contrib
+	gcc -O3 -Wall -ansi -c getopt.c
+	cd ..
+	gcc -o reveng bmpbit.o cli.o model.o poly.o preset.o reveng.o \
+		contrib/getopt.o
 
 The platform-independent method does not compile the preset models.  To
 compile them, you will need to edit the configuration options in
@@ -190,6 +195,7 @@ The options and switches for specifying a model are:
 		author's "Catalogue of parametrised CRC algorithms", as
 		of the date of this release.  The preset models can be
 		listed with -D.
+		-M, -r, -S, -t, -X, -y and -z must not precede -m MODEL.
 	-p POLY
 		The Poly value, that is, the generator polynomial that
 		sets the feedback tap positions of the shift register.
@@ -283,12 +289,12 @@ and output:
 		-a  3	Single octal digits 0-7.
 		-a  1	Single binary digits 0-1.
 		Note that raw messages (files or arguments) containing
-		digits will only be read as expected if there is no
-		final newline or other whitespace, and if the digits are
-		maskable in the system character encoding (as digits 0-9
-		are in ASCII, EBCDIC and Unicode.)  This is because the
-		lowest bits of each byte are extracted as described
-		above.
+		digits will only be read as expected if there are no
+		characters except digits (not even a final newline or
+		other whitespace), and if the digits are maskable in the
+		system character encoding, as digits 0-9 are in ASCII,
+		EBCDIC and Unicode.  This is because the lowest bits of
+		each byte are extracted as described above.
 	-A OBITS
 		Specifies the number of bits per character in output.
 	-f
@@ -474,8 +480,13 @@ have different lengths; otherwise there is only enough information to
 determine one value, given the other.  If all arguments have the same
 length then, by default,  CRC RevEng fixes XorOut at zero and calculates
 Init accordingly.  (In hardware it is easier to set a non-zero Init than
-to apply a non-zero XorOut.)  To set XorOut to another value, specify -x
-XOROUT; to fix Init and calculate XorOut instead, use -i INIT.
+to apply a non-zero XorOut.)  To set XorOut to another value, specify
+-x XOROUT; to fix Init and calculate XorOut instead, use -i INIT.
+
+When bit strings are input with -a 1, there is no information on
+endianness.  In such cases -s returns the big- and little-endian forms
+of each algorithm found.  The Check values of these forms will differ,
+as they are always calculated on the 8-bit UTF-8 string "123456789".
 
 POLYNOMIAL RANGE SEARCHING
 
@@ -490,10 +501,10 @@ concatenated coefficients as a binary integer, the range can be up to
 upwards, or from one polynomial up to (but excluding) another.
 
 Polynomial range searching is enabled using [-p POLY] -q QPOLY, where
-POLY and QPOLY are hex strings.  -p, if given, must precede -q.
-To start searching at a polynomial, use -p POLY -q 0.  To stop searching
-at a polynomial (exclusive), use -q QPOLY.  To search between two
-polynomial values, use -p POLY -q QPOLY.
+POLY and QPOLY are hex strings.  -p POLY, if given, must precede
+-q QPOLY.  To start searching at a polynomial, use -p POLY -q 0.  To
+stop searching at a polynomial (exclusive), use -q QPOLY.  To search
+between two polynomial values, use -p POLY -q QPOLY.
 
 Range limiting does not apply to the initial check against the preset
 models, or to Init or XorOut values, which are computed using a fast,
@@ -601,7 +612,7 @@ Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <http://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (31 March 2015).  "Catalogue of parametrised CRC
+Cook, Greg (24 February 2016).  "Catalogue of parametrised CRC
 algorithms".
   <http://reveng.sourceforge.net/crc-catalogue/>
 
@@ -613,13 +624,17 @@ Christchurch: University of Canterbury.
 Koopman, Philip (July 2002).  "32-Bit Cyclic Redundancy Codes for
 Internet Applications".  The International Conference on Dependable
 Systems and Networks: 459-468.  doi:10.1109/DSN.2002.1028931.
-  <http://www.ece.cmu.edu/~koopman/networks/dsn02/dsn02_koopman.pdf>
+  <https://users.ece.cmu.edu/~koopman/networks/dsn02/dsn02_koopman.pdf>
+
+Koopman, Philip (21 January 2016). "Best CRC Polynomials". Pittsburgh:
+Carnegie Mellon University.
+  <https://users.ece.cmu.edu/~koopman/crc/>
 
 Koopman, Philip; Chakravarty, Tridib (June 2004).  "Cyclic Redundancy
 Code (CRC) Polynomial Selection For Embedded Networks".  The
 International Conference on Dependable Systems and Networks: 145-154.
 doi:10.1109/DSN.2004.1311885.
-  <http://www.ece.cmu.edu/~koopman/roses/dsn04/
+  <https://users.ece.cmu.edu/~koopman/roses/dsn04/
     koopman04_crc_poly_embedded.pdf>
 
 Pircher, Thomas (4 December 2014). pycrc. Python based parametrised CRC

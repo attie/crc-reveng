@@ -5,8 +5,8 @@ CCflags = -c -depend !Depend -IC:,@ -DPRESETS -throwback -fafhp -Wa -apcs /nonre
 Linkflags = -aif -Relocatable -o $@
 
 # Final targets:
-@.reveng: @.o.bmpbit @.o.cli @.o.model @.o.poly @.o.reveng @.o.getopt C:o.stubs 
-        link $(Linkflags) @.o.bmpbit @.o.cli @.o.model @.o.poly @.o.reveng @.o.getopt C:o.stubs
+@.reveng: @.o.bmpbit @.o.cli @.o.model @.o.poly @.o.preset @.o.reveng @.o.getopt C:o.stubs 
+        link $(Linkflags) @.o.bmpbit @.o.cli @.o.model @.o.poly @.o.preset @.o.reveng @.o.getopt C:o.stubs
 
 
 # User-editable dependencies:
@@ -32,6 +32,9 @@ o.model:	h.config
 o.poly:	c.poly
 o.poly:	h.reveng
 o.poly:	h.config
+o.preset:	c.preset
+o.preset:	h.reveng
+o.preset:	h.config
 o.reveng:	c.reveng
 o.reveng:	h.reveng
 o.reveng:	h.config
@@ -42,10 +45,10 @@ o.getopt:	h.getopt
 
 
 # Mk/RISCOS
-# Greg Cook, 9/Apr/2015
+# Greg Cook, 24/Feb/2016
 
 # CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
+# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 #
 # This file is part of CRC RevEng.
 #

@@ -1,5 +1,5 @@
 CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -17,6 +17,17 @@ You should have received a copy of the GNU General Public License
 along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
+
+1.4.0	24 February 2016
+	* Added 11 new algorithms, CRC-4/INTERLAKEN, CRC-7/UMTS,
+	  CRC-8/LTE, CRC-8/SAE-J1850, CRC-11/UMTS, CRC-16/LJ1200,
+	  CRC-24/BLE, CRC-24/INTERLAKEN, CRC-24/LTE-A, CRC-24/LTE-B,
+	  CRC-30/CDMA, and 4 new aliases, CRC-12/UMTS, CRC-16/LTE,
+	  CRC-16/UMTS, CRC-32/INTERLAKEN, from the CRC Catalogue.
+	* Eliminated string comparison when testing if a model name is
+	  an alias.
+	* Split off presets into preset.c.
+	* Eliminated bogus calls to bsearch() in preset.c.
 
 1.3.1	31 July 2015
 	* Numerical (not raw) arguments and option parameters accept and
