@@ -19,6 +19,10 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+3.0.4	24 August 2022
+	* Added algorithm CRC-64/REDIS from the CRC Catalogue (thanks
+	  to Johann N. Loefflmann).
+
 3.0.3	8 May 2022
 	* Added algorithm CRC-16/M17 from the CRC Catalogue (thanks to
 	  Mark Adler).

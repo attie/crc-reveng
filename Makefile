@@ -1,6 +1,6 @@
 #!/usr/bin/make
 # Makefile
-# Greg Cook, 4/Jan/2022
+# Greg Cook, 24/Aug/2022
 
 # CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 # Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
@@ -92,4 +92,4 @@ pretst: bmpbit.c model.c poly.c preset.c $(HEADERS)
 	( ./$@ && $(TOUCH) $@ ) || ( $(RM) $@ $@$(EXT) && $(FALSE) )
 
 clean:
-	-$(RM) $(EXE) $(TARGETS) $(BINS)
+	-$(RM) $(EXE) $(EXE)$(EXT) $(TARGETS) $(BINS)
