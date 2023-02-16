@@ -1,5 +1,5 @@
 /* cli.c
- * Greg Cook, 11/Nov/2019
+ * Greg Cook, 8/Dec/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2019-11-01: initialize optind, opterr
+/* 2019-12-07: -impqwx in any order; warn if LSB of poly unset
+ * 2019-11-01: initialize optind, opterr
  * 2019-11-01: grow poly geometrically in rdpoly()
  * 2019-03-24: error message also requests -P before -s
  * 2018-07-26: NOFORCE renamed ALWPCK
@@ -67,6 +68,15 @@
 
 #include "reveng.h"
 
+#define C_INFILE  1
+#define C_NOPCK   2
+#define C_NOBFS   4
+#define C_RESULT  8
+
+#define BUFFER 32768
+#define GSCALE     4
+#define RECSMP     4
+
 static FILE *oread(const char *);
 static poly_t rdpoly(const char *, int, int);
 static void usage(void);
@@ -107,8 +117,11 @@ main(int argc, char *argv[]) {
 	SETBMP();
 
 	do {
-		c=getopt(argc, argv, "?A:BDFGLMP:SVXa:bcdefhi:k:lm:p:q:rstuvw:x:yz");
+		c=getopt(argc, argv, "?1A:BDFGLMP:SVXa:bcdefhi:k:lm:p:q:rstuvw:x:yz");
 		switch(c) {
+			case '1': /* 1  skip equivalent forms */
+				model.flags |= P_EXHST;
+				break;
 			case 'A': /* A: bits per output character */
 			case 'a': /* a: bits per character */
 				if((obperhx = atoi(optarg)) > BMP_BIT) {
@@ -207,8 +220,22 @@ main(int argc, char *argv[]) {
 ipqx:
 				pfree(pptr);
 				*pptr = strtop(optarg, 0, 4);
-				pright(pptr, width);
 				mnovel(&model);
+				/* warn user if bottom bit of poly unset */
+				if(c == 'p' && plen(model.spoly)) {
+					apoly = psubs(model.spoly, 0UL,
+						plen(model.spoly)-1UL,
+						plen(model.spoly), 0UL);
+					if(ptst(apoly)) {
+						pfree(&apoly);
+					} else {
+						fprintf(stderr, "%s: warning: "
+							"POLY has no +1 term; "
+							"did you mean -P %s?\n",
+							myname, optarg);
+						pfree(&apoly);
+					}
+				}
 				break;
 			case 'q': /* q: range end polynomial */
 				pptr = &qpoly;
@@ -247,6 +274,15 @@ ipqx:
 				;
 		}
 	} while(c != -1);
+
+
+	/* expand or trim parameters, right-aligned, to whichever width
+	 * we have now. -w, -p, -i and -x can be specified in any order.
+	 */
+	pright(&model.spoly, width);
+	pright(&model.init, width);
+	pright(&model.xorout, width);
+	pright(&qpoly, width);
 
 	/* canonicalise the model, so the one we dump is the one we
 	 * calculate with (not with -s, spoly may be blank which will
@@ -369,8 +405,23 @@ ipqx:
 			if(!ptst(qpoly))
 				rflags &= ~R_HAVEQ;
 
-			/* allocate argument array */
+			/* warn if searching with few arguments */
 			args = argc - optind;
+			if(!args)
+				fprintf(stderr, "%s: warning: you have "
+					"not given any samples\n",
+					myname);
+			else if(args < RECSMP) {
+				fprintf(stderr, "%s: warning: you have "
+					"only given %d sample%s\n",
+					myname, args,
+				       	(args == 1) ? "" : "s");
+				fprintf(stderr, "%s: warning: to reduce "
+					"false positives, give %d or "
+					"more samples\n", myname, RECSMP);
+			}
+
+			/* allocate argument array */
 			if(!(apolys = malloc(args * sizeof(poly_t))))
 				uerror("cannot allocate memory for argument list");
 
@@ -549,7 +600,7 @@ rdpoly(const char *name, int flags, int bperhx) {
 	praloc(&apoly, total);
 
 	if(ferror(input)) {
-		fprintf(stderr,"%s: error condition on file '%s'\n", myname, name);
+		fprintf(stderr,"%s: %s: error condition on file\n", myname, name);
 		exit(EXIT_FAILURE);
 	}
 	/* close file unless stdin */
@@ -557,7 +608,7 @@ rdpoly(const char *name, int flags, int bperhx) {
 		/* reset EOF condition */
 		clearerr(input);
 	else if(fclose(input)) {
-		fprintf(stderr,"%s: error closing file '%s'\n", myname, name);
+		fprintf(stderr,"%s: %s: error closing file\n", myname, name);
 		exit(EXIT_FAILURE);
 	}
 	return(apoly);
@@ -572,7 +623,7 @@ oread(const char *name) {
 	if(*name == '-' && name[1] == '\0')
 		return(stdin);
 	if(!(handle = fopen(name, "rb"))) {
-		fprintf(stderr, "%s: cannot open '%s' for reading\n", myname, name);
+		fprintf(stderr, "%s: %s: cannot open for reading\n", myname, name);
 		exit(EXIT_FAILURE);
 	}
 	return(handle);
@@ -586,7 +637,7 @@ usage(void) {
 			"Usage:\t");
 	fputs(myname, stderr);
 	fprintf(stderr,
-			"\t-cdDesvhu? [-bBfFGlLMrStVXyz]\n"
+			"\t-cdDesvhu? [-1bBfFGlLMrStVXyz]\n"
 			"\t[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL] [-p POLY]\n"
 			"\t[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT] [STRING...]\n"
 			"Options:\n"
@@ -603,14 +654,14 @@ usage(void) {
 			"\t-w WIDTH\tregister size, in bits\n"
 			"\t-x XOROUT\tfinal register XOR value\n"
 			"Modifier switches:\n"
-			"\t-b big-endian CRC\t\t-B big-endian CRC output\n"
-			"\t-f read files named in STRINGs\t-F skip preset model check pass\n"
-			"\t-G skip brute force search pass\t-l little-endian CRC\n"
-			"\t-L little-endian CRC output\t-M non-augmenting algorithm\n"
-			"\t-r right-justified output\t-S print spaces between characters\n"
-			"\t-t left-justified output\t-V reverse algorithm only\n"
-			"\t-X print uppercase hexadecimal\t-y low bytes first in files\n"
-			"\t-z raw binary STRINGs\n");
+			"\t-1 skip equivalent forms\t-b big-endian CRC\n"
+			"\t-B big-endian CRC output\t-f read files named in STRINGs\n"
+			"\t-F skip preset model check pass\t-G skip brute force search pass\n"
+			"\t-l little-endian CRC\t\t-L little-endian CRC output\n"
+			"\t-M non-augmenting algorithm\t-r right-justified output\n"
+			"\t-S print spaces between chars\t-t left-justified output\n"
+			"\t-V reverse algorithm only\t-X print uppercase hexadecimal\n"
+			"\t-y low bytes first in files\t-z raw binary STRINGs\n");
 	fprintf(stderr,
 			"Mode switches:\n"
 			"\t-c calculate CRCs\t\t-d dump algorithm parameters\n"

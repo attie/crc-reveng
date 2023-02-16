@@ -1,14 +1,16 @@
 System requirements of ARM Tube OS binary
-Greg Cook, 21 November 2019
+Greg Cook, 10 July 2020
 
 CRC RevEng has been tested on a 16MB SPROW ARM7TDMI Coprocessor running
 ARM Tube OS version 0.45, with OS 1.20 on the host.  Installation on
 disc is strongly recommended.
 The following filing systems are known to be compatible:-
 
-- OPUS EDOS 0.4, patched by EDOSPAT versions 4.90, 5.40 or 6.03
+- OPUS EDOS 0.4, patched by EDOSPAT versions 4.90, 5.60 or 7.00
+- OPUS DDOS 3.16, 3.36 or 3.46 with DFSfix installed (see below)
+- Acorn DFS 1.20/1.21 (part of DNFS 3.00/3.01) with DFSfix installed
 - Acorn DFS 2.26, as supplied with the GoMMC interface (PDFS226.BIN),
-  with DFSfix installed (see below)
+  with DFSfix installed
 
 To load and run the ARM Tube OS binary successfully, the Disc Filing
 System (DFS) on the host computer must support at least the following:
@@ -19,8 +21,12 @@ System (DFS) on the host computer must support at least the following:
   faithful emulations of RISC OS or by translation to similar existing
   calls.
 
-Once CRC RevEng has been loaded and executed, it can be reinvoked
-without reloading the image, using *Go:-
+Once CRC RevEng has been loaded, it can be invoked or reinvoked without
+reloading the image, using *Go:-
+
+	*Load reveng
+	[exchanging discs]
+	*Go ; -m crc-32/iso-hdlc -A 32 -c -X -f r.dfsnet
 
 	*reveng -h
 	*Go ; -m crc-16/ibm-sdlc -c 313233343536373839
@@ -43,14 +49,24 @@ width	lengths		Runtime	Reports	Runtime	Reports
 The ARM Tube OS binary also runs as a statically-linked image under
 RISC OS, at twice the size of the RISC OS binary.
 
+ANSIlib is provided by RISC OS Open Limited for testing purposes only,
+and so neither the availability of the ARM Tube OS binary nor its
+compatibility with either ARM Tube OS or RISC OS are guaranteed.  See
+Documents.DDE.32bit.Intro in the DDE distribution.
+
 DFSfix
 
-This is a small utility which installs itself over the host's filing
-system, and emulates just enough of RISC OS's FileSwitch API for simple
-RISC OS programs using the ANSI C Library to read and write files to
-Acorn DFS through the ARM Tube OS.
+This is a small utility for the BBC Micro (or Master series)
+computer which installs itself between the Acorn Disc Filing System
+firmware (Acorn DFS) and the public filing system call points,
+providing an enhanced filing system interface.
+The new interface is useful to all programs, but when a simple
+RISC OS program using the ANSI C Library is run on an attached SPROW
+ARM7TDMI Coprocessor with its built-in ARM Tube OS firmware, DFSfix
+emulates just enough of RISC OS's FileSwitch API for the program to
+read and write files to Acorn DFS discs through the ARM Tube OS.
 
-DFSfix is only for use with Acorn DFS.
+DFSfix is only for use with Acorn DFS and Opus DDOS.
 
 To install DFSfix, enter the following (once) after pressing BREAK:
 

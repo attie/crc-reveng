@@ -108,7 +108,7 @@ command line.
 
 SYNOPSIS
 
-Usage:	reveng	-cdDesvhu? [-bBfFGlLMrStVXyz]
+Usage:	reveng	-cdDesvhu? [-1bBfFGlLMrStVXyz]
 	[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL] [-p POLY]
 	[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT] [STRING...]
 Options:
@@ -123,14 +123,14 @@ Options:
 	-w WIDTH	register size, in bits
 	-x XOROUT	final register XOR value
 Modifier switches:
-	-b big-endian CRC		-B big-endian CRC output
-	-f read files named in STRINGs	-F skip preset model check pass
-	-G skip brute force search pass	-l little-endian CRC
-	-L little-endian CRC output	-M non-augmenting algorithm
-	-r right-justified output	-S print spaces between characters
-	-t left-justified output	-V reverse algorithm only
-	-X print uppercase hexadecimal	-y low bytes first in files
-	-z raw binary STRINGs
+	-1 skip equivalent forms	-b big-endian CRC
+	-B big-endian CRC output	-f read files named in STRINGs
+	-F skip preset model check pass	-G skip brute force search pass
+	-l little-endian CRC		-L little-endian CRC output
+	-M non-augmenting algorithm	-r right-justified output
+	-S print spaces between chars	-t left-justified output
+	-V reverse algorithm only	-X print uppercase hexadecimal
+	-y low bytes first in files	-z raw binary STRINGs
 Mode switches:
 	-c calculate CRCs		-d dump algorithm parameters
 	-D list preset algorithms	-e echo (and reformat) input
@@ -173,8 +173,6 @@ The options and switches for specifying a model are:
 	-i INIT
 		A hexadecimal digit string specifying the initial value
 		to set in the shift register before computing the CRC.
-		The width must be specified with -k, -m, -P or -w
-		before -i INIT.
 	-k KPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed-reciprocal notation found in
@@ -199,7 +197,8 @@ The options and switches for specifying a model are:
 		author's "Catalogue of parametrised CRC algorithms", as
 		of the date of this release.  The preset models can be
 		listed with -D.
-		-M, -r, -S, -t, -X, -y and -z must not precede -m MODEL.
+		-1, -M, -r, -S, -t, -X, -y and -z must not precede
+		-m MODEL.
 	-p POLY
 		The Poly value, that is, the generator polynomial that
 		sets the feedback tap positions of the shift register.
@@ -208,8 +207,6 @@ The options and switches for specifying a model are:
 		omitted, thus 0x18005 is specified as 8005.
 		-p also sets the start of the range for polynomial range
 		searching, see -q.
-		The width must be specified with -k, -m, -P or -w
-		before -p POLY.
 	-P RPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed notation found in LSB-first code.
@@ -229,8 +226,6 @@ The options and switches for specifying a model are:
 	-x XOROUT
 		A hexadecimal digit string specifying the value to be
 		added to the final shift register value before output.
-		The width must be specified with -k, -m, -P or -w
-		before -x XOROUT.
 
 Other model-related options:
 
@@ -555,15 +550,16 @@ When bit strings are input with -a 1, there is no information on
 endianness.  In such cases -s returns the big- and little-endian forms
 of each algorithm found.  The Check values of these forms will differ,
 as they are always calculated on the 8-bit UTF-8 string "123456789".
-The Residue values will be each other's mirror images.
+The Residue values will be each other's mirror images in binary.
 
 Each CRC algorithm whose generator polynomial is a multiple of (x + 1)
-has one or more aliases.  Aliases differ in Init, XorOut and Residue
-values, but they produce identical CRCs at all message lengths.
-Therefore unless -i INIT or -x XOROUT are specified, any such algorithm
-and its aliases are always returned together, no matter how many
-codewords are given.  (If (x + 1) appears n times in the factorisation
-of G(x), then there shall be 2^n - 1 aliases.)
+has one or more equivalent forms.  Equivalent forms differ in Init,
+XorOut and Residue values, but they produce identical CRCs at all
+message lengths.  Therefore unless -1, -i INIT or -x XOROUT are
+specified, any such algorithm and its equivalent forms are always
+returned together, no matter how many codewords are given.  (If (x + 1)
+appears n times in the factorisation of G(x), then there shall be
+2^n - 1 equivalent forms.)
 
 
 POLYNOMIAL RANGE SEARCHING
@@ -623,6 +619,13 @@ big-endian range search, and one little-endian full search.
 
 The full list of search options is as follows:
 
+	-1
+		Skip (do not list) the equivalent forms of each
+		model found during the brute force search pass; Ewing's
+		algorithm is terminated after finding the lexically
+		least solution to Init.
+		The form that is listed may not necessarily match
+		the definition printed in a specification document.
 	-F
 		Skip the preset model check pass.  (Not recommended.)
 	-G
@@ -688,9 +691,9 @@ GNU General Public License (see file COPYING), remember that CRC RevEng
 is a search tool.  The return of a CRC model as a search result is a
 statement that all the given codeword samples satisfy that model, not a
 proof that the model, or any CRC algorithm at all, produced those
-samples.  Any particular search result may be a fluke, especially from a
-small number of samples.  Also any output is only as accurate as the
-input.
+samples.  Any particular search result may be a false positive,
+especially from a small number of samples.  Also any output is only as
+accurate as the input.
 
 Model reversal (-V, -v) makes little sense on crossed-endian models.
 

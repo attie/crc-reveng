@@ -1,130 +1,137 @@
 *| dfsfix.txt
-*| Greg Cook, 21 November 2019
+*| Greg Cook, 10 July 2020
 *|
-*| This is a small utility which installs itself over the host's filing
-*| system, and emulates just enough of RISC OS's FileSwitch API for simple
-*| RISC OS programs using the ANSI C Library to read and write files to
-*| Acorn DFS through the ARM Tube OS.
+*| This assembles a small utility for the BBC Micro (or Master series)
+*| computer which installs itself between the Acorn Disc Filing System
+*| firmware (Acorn DFS) and the public filing system call points,
+*| providing an enhanced filing system interface.
+*| The new interface is useful to all programs, but when a simple
+*| RISC OS program using the ANSI C Library is run on an attached SPROW
+*| ARM7TDMI Coprocessor with its built-in ARM Tube OS firmware, DFSfix
+*| emulates just enough of RISC OS's FileSwitch API for the program to
+*| read and write files to Acorn DFS discs through the ARM Tube OS.
+*| DFSfix also enhances Opus DDOS versions 3.15, 3.16, 3.35, 3.36,
+*| 3.45 and 3.46.
 *|
 *| Functions performed:
-*| OSFILE: A=7, A=11 translated to A=0; A=9 translated to A=1.
-*| OSARGS: A=3, Y>0 (set EXT) implemented.
-*| OSGBPB: A=1..4 clears the EOF warning flag.
-*|         If DFS returns A>0, optionally sets C=1 or C=1 iff L>0.
+*| OSFILE: translates A=7, A=11 to A=0; translates A=9 to A=1.
+*| OSARGS: A=3, Y>0 sets the EXT (extent, length) of an open file.
+*| OSGBPB: clears the EOF warning flag on exit when A=1..4.
 *| OSFIND: passes only b7..6 of A to DFS.  Raises "Not found" error iff
 *|         b6, b3 are both set and DFS returns A=0 (no file handle.)
+*|
+*| Usage:
+*|   *EXEC this text, or send it over a serial link, to load the
+*|   assembler program into BASIC.  At the end of the file press ESCAPE
+*|   to regain the BASIC prompt.
+*|   At the BASIC prompt (>) type RUN and the press the RETURN key.
+*|   At the program's prompts enter the recommended assembly options
+*|   to assemble and save the utility file, named dfsfix.
+*|   To install DFSfix, either type Y at the "Install?" prompt
+*|   or enter the following (once) after pressing BREAK:
+*|
+*|         *dfsfix
 *|
 *| Caveats:
 *|   A is undefined on exit from OSARGS 3,Y.
 *|   The underlying OSARGS and OSGBPB are expected to raise an error
 *|   if the file handle is invalid.
-*|   Installing DFSfix over a filing system other than its intended FS
-*|   results in undefined behaviour.
-*|   Installing DFSfix twice after pressing BREAK hangs the machine.
+*|   Installing DFSfix over a filing system other than Acorn DFS or
+*|   Opus DDOS results in undefined behaviour.
+*|   Installing DFSfix twice without pressing BREAK hangs the machine.
 *|
 *| Recommended assembly options:
-*|   1600,Y,N,N,Y,S (Acorn DFS, 252 bytes)
-*|   1500,Y,Y,N,N,L (Unpatched Opus EDOS 0.4, 252 bytes)
+*|   15A7,R,N,Y,Y,N,Y (289 bytes)
 *|
 *| Assembly options:
-*| Address (&1400): &
+*| Address (&1500): &
 *|   Assemble DFSfix starting at this address.  Press RETURN to use the
-*|   default address of &1400, or type a hexadecimal address (after the
+*|   default address of &1500, or type a hexadecimal address (after the
 *|   &) and then press RETURN.
 *|   Where DFSfix resides determines which of the BBC Micro's facilities
 *|   remain available.
 *|   DFSfix can be placed for instance at:-
 *|      &B00, in place of function key expansions
-*|      &C00, in place of user-defined characters
-*|     &1400, in place of sector buffer &13..14 (DFS) / &14..&15 (EDOS)
-*|     &1500, in place of sector buffer &14..15 (DFS) / &15 (EDOS)
-*|     &1600, in place of sector buffer &15 (DFS)
-*|     &6800, in place of graphics display modes, clear of the BASIC
-*|            program, heap and stack
-*|   Thus an assembly address of &1400 leaves two file handles free in
-*|   DFS and three in EDOS.
-*|   DFSfix without options assembles to 192 bytes of routines + 41 byte
-*|   installer erasable after use = 233 (&E9) bytes.
-*|   The address need not be page-aligned, but remember that 256 or 512
-*|   bytes of memory will be overwritten when DFSfix is loaded.
+*|      &C00, in place of user-defined characters (not with option R)
+*|     &1500, in place of sector buffer &14..15
+*|     &1600, in place of sector buffer &15 (not with option R)
+*|     &1800, in place of *BUILD and *DUMP (not with option R)
+*|     &1900, in place of programs that run at &1900
+*|            (set PAGE=&1B00 to run BASIC programs with minimal
+*|            disruption)
+*|     &7A00, in place of graphics display modes (must set HIMEM=&7A00)
+*|   Thus an assembly address of &1500 leaves file handles &11..&13 free
+*|   DFSfix without options assembles to 186 bytes of routines + 42 byte
+*|   installer erasable after use = 228 bytes (&E4).
+*|   The address need not be page-aligned.
+*|   You must ensure that neither the code nor the generated image file
+*|   will overwrite critical memory areas.
 *|
-*| Installer first? (Y/N):
-*|   Typing Y places the installer before the routines.  This usually
-*|   causes the execution address to equal the load address.
+*| Installer (F)irst/(L)ast/(R)eloc:
+*|   Typing F or L places the installer before or after the routines,
+*|   respectively.
+*|   Typing R adds 47 bytes and creates a GoMMC-compatible tool which
+*|   can be loaded at any address and installs the DFSfix routines at
+*|   the address entered + &59.
 *|
-*| For old EDOS? (Y/N): Y adds 3 bytes
-*|   Assembles DFSfix for Acorn DFS (N) or any version of Opus EDOS (Y).
-*|   Decides where PTR, EXT and the EOF warning flag are located.
-*|   Type N here as the EDOS version is only for testing, and EDOSPAT
-*|   carries out all these functions better.
+*| OSARGS 3,Y to test MSB? (Y/N):
+*|   Typing Y adds 9 bytes.
+*|   Causes DFSfix to treat the parameter to OSARGS 3,Y as a 24-bit (N)
+*|   or 32-bit (Y) quantity.  In the latter case, a request with any of
+*|   the top 8 bits set raises a "Can't extend" error.
+*|   With N a pointer prepared for a 24-bit implementation of OSARGS 1,Y
+*|   can also be passed to OSARGS 3,Y.  The Y option however enables
+*|   strict compliance with the DFS and RISC OS APIs.
 *|
-*| OSARGS 3,Y to test MSB? (Y/N): Y adds 12 bytes
-*|   Treats the parameter to OSARGS as a 24-bit (N) or 32-bit (Y)
-*|   quantity.  In the latter case any request to extend a file beyond
-*|   16 MiB raises a "Can't extend" error.
-*|   With N a pointer prepared for a 24-bit implementation of
-*|   OSARGS 1,Y can also be passed to OSARGS 3,Y.  The Y option
-*|   enables strict compliance with the DFS and RISC OS APIs.
-*|
-*| OSARGS 3,Y to clamp PTR? (Y/N): Y adds 17 bytes
-*|   With N, calls to OSARGS 3,Y do not change a file's pointer while
-*|   changing its size, and so the pointer may sometimes be left far
+*| OSARGS 3,Y to clamp PTR? (Y/N):
+*|   Typing Y adds 14 bytes.
+*|   With N, calls to OSARGS 3,Y leave a file's pointer unchanged after
+*|   setting the length, and so the pointer may sometimes be left far
 *|   beyond the end of the file.
-*|   This is a normal condition in some filing systems, where setting
-*|   PTR makes no changes to the file and only takes effect on the next
-*|   write operation.  Type N for use with EDOS and other such filing
-*|   systems, where OSARGS 1,Y and 3,Y may be expected to act
-*|   independently.
 *|   However the RISC OS PRM defines that setting EXT shall leave PTR
-*|   pointing to the end-of-file or before.  Acorn DFS enforces this
-*|   condition at all times, so the proper choice is Y in this case.
-*|   Otherwise, refrain from performing a truncation that will leave the
-*|   pointer 'dangling'.
+*|   pointing to the end-of-file or before.  Y is the proper choice for
+*|   use with RISC OS applications, which have this expectation, and/or
+*|   Acorn DFS, which enforces this condition at all times.
+*|   Otherwise, you may choose N and then refrain from performing any
+*|   length adjustment that would leave the pointer 'dangling'.
 *|   Fortunately, RISC OS programs that just write files sequentially
 *|   only zero a file's length initially, when the pointer is also zero.
-*|   Not clamping PTR is potentially useful, making file truncation a
-*|   means of discarding a portion of data before the pointer in a
-*|   single step.  But as mentioned, it may violate the filing system's
-*|   assumptions about the pointer, and should be tried with caution.
-*|
-*| C if OSGBPB returns A>0:-
-*| Preserve / Set / Set iff L>0 (P/S/L): S adds 3 bytes, L adds 17 bytes
-*|   Tells DFSfix what to do with the carry flag when the underlying
-*|   OSARGS routine returns a nonzero A register.  This implies an
-*|   illegal use of A, an unimplemented OSARGS call, or a filing system
-*|   that implements the call but improperly preserves the call number.
-*|   With P, DFSfix does not interfere, passing whatever carry flag
-*|   (and accumulator) was returned from OSARGS.
-*|   With S, DFSfix returns C=1; the user can then tell solely from C=1
-*|   that there was a problem with his or her call.
-*|   With L, DFSfix sets C=1 if the length field at XY+5..8 indicates
-*|   that one or more bytes were not transferred, C=0 otherwise.
-*|   This covers for EDOS when A=1..4 or 8.
-*|   Knowing that a filing system is indeed there, more complex code can
-*|   return the appropriate carry flag; but this is beyond the scope of
-*|   DFSfix.
 *|
 *| Save? (Y/N):
 *|   Type Y to save DFSfix to disc as well or N to generate only the
 *|   assembly listing.
 *|
 *| Page aligned file? (Y/N):
-*|   Type Y to save DFSfix starting at a page boundary, so that less
-*|   data beyond the DFSfix code may be overwritten when loading.
+*|   Type Y to save DFSfix starting at a page boundary.
 *|   Type N to save DFSfix starting at the code.
-*|   Where the code is page aligned, the option is not given.
+*|   With relocatable or page aligned code, the option is not given.
+*|
+*| Display file? (Y/N):
+*|   If DFSfix was saved to disc, type Y to display the file's
+*|   information and a dump of its contents; otherwise the option is
+*|   not given.
+*|
+*| Install? (Y/N):
+*|   Type Y to install DFSfix now.  DFSfix must not be installed or
+*|   assembled a second time.  After N, or the BREAK key, is pressed,
+*|   DFSfix can be installed from disc as described above.
 
 *BASIC
 NEW
 AUTO
 REM >A.DFSFIX
-REM Greg Cook 21/Nov/2019 15:24
+REM Greg Cook 10/Jul/2020 10:10
+REM Version 5.1
 
-REM Reportedly unused space in the Econet area
+REM Cannot use current filename at &C7
+REM OSARGS 1,Y overwrites it during a file extension
+REM Reportedly unused space in the Econet area = &90..&96
 REM http://mdfs.net/Docs/Comp/BBC/AllMem
 tempptr=&93
 REM OSARGS 3,Y and OSGBPB will not cause themselves or each other to be called
 ptr=&93
+REM Address of JMP (ind) trampoline, high byte must be a safe opcode
+safeopcode=&100
 os_vector_base=&200
 os_filev=&212
 os_argsv=&214
@@ -134,22 +141,22 @@ os_softkey_buffer=&B00
 osbput=&FFD4
 osfile=&FFDD
 
-base%=FNgethex("Address (&1400): &",&1400)
-PRINT"Installer first? ";:installer_first%=FNyesno
-PRINT"For old EDOS? ";:edos%=FNyesno
+base%=FNgethex("Address (&1500): &",&1500)
+PRINT"Installer (F)irst/(L)ast/(R)eloc:";
+REPEAT input%=INSTR(" FfLlRr",GET$)DIV 2:UNTIL input%>0
+PRINT MID$("FLR",input%,1)
+IF input%=1 THEN installer_first%=1:tool%=0
+IF input%=2 THEN installer_first%=0:tool%=0
+IF input%=3 THEN installer_first%=1:tool%=1
 PRINT"OSARGS 3,Y to test MSB? ";:args32%=FNyesno
 PRINT"OSARGS 3,Y to clamp PTR? ";:clampptr%=FNyesno
-PRINT"C if OSGBPB returns A>0:-"'"Preserve / Set / Set iff L>0 (P/S/L):";
-REPEAT input%=INSTR(" PpSsLl",GET$)DIV 2:UNTIL input%>0
-PRINT MID$("PSL",input%,1)
-IF input%=1 THEN preserve%=1:test_length%=0
-IF input%=2 THEN preserve%=0:test_length%=0
-IF input%=3 THEN preserve%=0:test_length%=1
 
-IF edos% THEN channel_ext=&1082 ELSE channel_ext=&1114
-IF edos% THEN channel_ptr=&1085 ELSE channel_ptr=&1110
-IF edos% THEN channel_eof_warning_flag=&1070 ELSE channel_eof_warning_flag=&1117
-IF edos% THEN channel_eof_warning_mask%=&FE ELSE channel_eof_warning_mask%=&EF
+channel_ro_flag=&110C
+channel_lock_flag=&110E
+channel_ext=&1114
+channel_buffer_flag=&1117
+channel_eof_warning_mask%=&EF
+channel_ext_changed%=&20
 
 pass1%=0:pass2%=3
 
@@ -163,6 +170,8 @@ IF installer_first% ELSE PROCasm_installer
 NEXT
 
 PRINT '"Save? ";:IF FNyesno THEN PROCsave
+*| command to initialize GSINIT pointer
+PRINT "Install? ";:IF FNyesno THEN CALL install
 END
 
 DEF FNgethex(prompt$,default%)
@@ -207,6 +216,9 @@ ENDPROC
 DEF PROCasm_installer
 [OPT pass%
 .install
+]
+IF tool% THEN PROCasm_tool
+[OPT pass%
 LDX #os_filev-os_vector_base
 LDY #filewrap_jmp+1-routines
 JSR install_hook
@@ -218,9 +230,10 @@ LDY #gbpbwrap_jsr+1-routines
 JSR install_hook
 \LDX #os_findv-os_vector_base
 LDY #findwrap_jsr+1-routines
-.install_hook
-JSR install_hook_byte
-.install_hook_byte
+]
+IF tool% ELSE [OPT pass%:.install_hook:]
+[OPT pass%
+.install_hook_0
 LDA routines,Y
 PHA
 LDA os_vector_base,X
@@ -229,43 +242,66 @@ PLA
 STA os_vector_base,X
 INX
 INY
+TXA
+LSR A
+BCS install_hook_0
 RTS
 .install_end
 ]
 ENDPROC
 
+DEF PROCasm_tool
+[OPT pass%
+.getpc
+LDX #&6C \JMP (ind)
+LDY &4347 \skip GoMMC command line argument pointer poke
+STX safeopcode
+TSX
+DEX
+STX safeopcode+1
+LDX #&01
+STX safeopcode+2
+.datum
+JSR safeopcode \execute high byte as opcode
+]
+PROCequb(&F1):REM ORA (&F1,X), X=1; GSINIT pointer initialized
+[OPT pass%
+PLA
+CLC
+ADC #(install_hook_0-datum-2)AND&FF
+STA ptr+1
+PLA
+ADC #(install_hook_0-datum-2)DIV256
+STA ptr+2
+LDY #(routines_end-install_hook_0)AND&FF
+.drop
+DEY
+LDA (ptr+1),Y
+STA install_hook_0,Y
+CPY #routines-install_hook_0
+BNE drop
+STA ptr \first byte is &4C, JMP abs
+]
+install_hook=ptr
+ENDPROC
+
 DEF PROCasm_routines
 [OPT pass%
 .routines
-.routines_clear_eof_warning
+.argswrap_jmp
+JMP argswrap
+:
 ]
-IF edos% THEN PROCasm_edos ELSE PROCasm_dfs
+IF clampptr% THEN [OPT pass%:.argswrap_ply_set_ptr:PLA:TAY:]
 [OPT pass%
-LDA channel_eof_warning_flag,Y
-AND #channel_eof_warning_mask%
-STA channel_eof_warning_flag,Y
-RTS
-:
-.filewrap_0
-LDA #9 EOR 1 EOR 0
-.filewrap_1
-EOR #9 EOR 1
-.filewrap
-CMP #7
-BEQ filewrap_0
-CMP #9
-BEQ filewrap_1
-CMP #11
-BEQ filewrap_0
-.filewrap_jmp
-JMP filewrap
-:
+.argswrap_set_ptr
+LDA #1
 .argswrap
-CPY #1
-BCC argswrap_jmp
 CMP #3
 BNE argswrap_jmp
+CPY #0
 CLC
+BEQ argswrap_jmp
 .argswrap_temp_ptr
 TXA
 PHA
@@ -287,7 +323,14 @@ LDA channel_ext+1,Y
 SBC 1,X
 LDA channel_ext+2,Y
 SBC 2,X
-BCC argswrap_extend \if request > EXT then extend
+BCC argswrap_extend \if EXT < request then extend
+LDA channel_ro_flag,Y
+ORA channel_lock_flag,Y
+BMI argswrap_truncate \if read-only channel don't write new EXT to catalogue
+LDA channel_buffer_flag,Y
+ORA #channel_ext_changed%
+STA channel_buffer_flag,Y
+.argswrap_truncate
 LDA 2,X
 STA channel_ext+2,Y
 LDA 1,X
@@ -298,33 +341,28 @@ STA channel_ext,Y
 IF clampptr% THEN PROCasm_clampptr
 IF args32% THEN PROCasm_args32_2
 [OPT pass%
-.argswrap_extend \on entry C=0 to extend, C=1 to return EXT; request > 0
+.argswrap_extend \on entry C=0 to extend, C=1 to return EXT; request > EXT >= 0
 PLA
 TAY
 LDA #2
 BCS argswrap_jmp
-LDA 0,X
-BNE argswrap_dec_1
-LDA 1,X
-BNE argswrap_dec_2
-DEC 2,X
-.argswrap_dec_2
-DEC 1,X
-.argswrap_dec_1
-DEC 0,X
 JSR argswrap_set_ptr
-LDA #0
-JSR osbput
-JSR argswrap_jmp
 SEC
 BCS argswrap_temp_ptr
-]
-IF clampptr% THEN [OPT pass%:.argswrap_ply_set_ptr:PLA:TAY:]
-[OPT pass%
-.argswrap_set_ptr
-LDA #1
-.argswrap_jmp
-JMP argswrap
+:
+.filewrap_0
+LDA #9 EOR 1 EOR 0
+.filewrap_1
+EOR #9 EOR 1
+.filewrap
+CMP #7
+BEQ filewrap_0
+CMP #9
+BEQ filewrap_1
+CMP #11
+BEQ filewrap_0
+.filewrap_jmp
+JMP filewrap
 :
 .gbpbwrap
 STA ptr
@@ -332,11 +370,7 @@ STY ptr+1
 .gbpbwrap_jsr
 JSR gbpbwrap
 TAY
-]
-IF preserve% THEN [OPT pass%:BNE gbpbwrap_quit:]
-IF test_length% THEN [OPT pass%:BNE gbpbwrap_test_length:]
-IF test_length% OR preserve% ELSE [OPT pass%:BNE gbpbwrap_sec_quit:]
-[OPT pass%
+BNE gbpbwrap_quit
 PHP
 LDA #4
 CMP ptr
@@ -344,17 +378,25 @@ BCC gbpbwrap_plp
 STX ptr
 LDA (ptr),Y
 JSR routines_clear_eof_warning
-LDA #0
 .gbpbwrap_plp
+LDA #0
 PLP
 .gbpbwrap_quit
 LDY ptr+1
-.gbpbwrap_exit
 RTS
-]
-IF test_length% THEN PROCasm_gbpbwrap_test_length
-IF test_length% OR preserve% ELSE [OPT pass%:.gbpbwrap_sec_quit:SEC:BCS gbpbwrap_quit:]
-[OPT pass%
+:
+.routines_clear_eof_warning
+ASL A
+ASL A
+ASL A
+ASL A
+ASL A
+TAY
+LDA channel_buffer_flag,Y
+AND #channel_eof_warning_mask%
+STA channel_buffer_flag,Y
+.findwrap_exit
+RTS
 :
 .findwrap
 PHA
@@ -367,8 +409,8 @@ AND #&C0
 JSR findwrap
 PLP
 EOR #0
-BNE gbpbwrap_exit
-BCC gbpbwrap_exit
+BNE findwrap_exit
+BCC findwrap_exit
 BRK
 ]
 PROCequb(&D6)
@@ -382,9 +424,9 @@ ENDPROC
 DEF PROCasm_args32_1
 [OPT pass%
 \treat parameter as 32 bits
-LDA #0
-CMP 3,X
-BCC argswrap_extend_max
+LDA 3,X
+CLC
+BNE argswrap_extend_max
 ]
 ENDPROC
 
@@ -392,66 +434,22 @@ DEF PROCasm_clampptr
 [OPT pass%
 \clamp PTR
 \request - PTR
-CMP channel_ptr,Y
+CMP tempptr
 LDA 1,X
-SBC channel_ptr+1,Y
+SBC tempptr+1
 LDA 2,X
-SBC channel_ptr+2,Y
-BCC argswrap_ply_set_ptr
+SBC tempptr+2
+BCC argswrap_ply_set_ptr \if request < PTR set PTR = request
 ]
 ENDPROC
 
 DEF PROCasm_args32_2
 [OPT pass%
-.argswrap_extend_max \on entry C=0 to extend, C=1 to return EXT
-STA 0,X
-\LDA #&FF
-STA 1,X
+.argswrap_extend_max \on entry C=0 to extend to maximum, C=1 to return EXT
+LDA #&FF
+\STA 0,X
+\STA 1,X
 STA 2,X
-]
-ENDPROC
-
-DEF PROCasm_edos
-[OPT pass%
-\return Y=A*&18 for y=1..7
-AND #&07
-TAY
-\BEQ routines_edos_exit
-SEC
-.routines_edos_loop
-INY
-ADC #&85
-BNE routines_edos_loop
-\.routines_edos_exit
-]
-ENDPROC
-
-DEFPROCasm_dfs
-[OPT pass%
-ASL A
-ASL A
-ASL A
-ASL A
-ASL A
-TAY
-]
-ENDPROC
-
-DEF PROCasm_gbpbwrap_test_length
-[OPT pass%
-.gbpbwrap_test_length
-PHA
-STX ptr
-LDY #9
-.gbpbwrap_test_length_byte
-DEY
-CPY #5
-BCC gbpbwrap_test_length_quit
-LDA (ptr),Y
-BEQ gbpbwrap_test_length_byte
-.gbpbwrap_test_length_quit
-PLA
-BNE gbpbwrap_quit
 ]
 ENDPROC
 
@@ -464,8 +462,13 @@ $filename%="dfsfix"
 osblock%!2=&FFFF0000 OR base%
 osblock%!6=&FFFF0000 OR install
 osblock%!10=base%
-IF osblock%?2 THEN PRINT "Page aligned file? ";:IF FNyesno THEN osblock%?2=0:osblock%?10=0
+IF osblock%?2 THEN IF tool%=0 THEN PRINT "Page aligned file? ";:IF FNyesno THEN osblock%?2=0:osblock%?10=0
 osblock%!14=P%
 A%=0
 CALL osfile
+PRINT "Display file? ";:IF FNyesno ELSE ENDPROC
+*INFO dfsfix
+*DUMP dfsfix
 ENDPROC
+
+REM End of A.DFSFIX

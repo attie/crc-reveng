@@ -1,5 +1,5 @@
 /* reveng.h
- * Greg Cook, 18/Nov/2019
+ * Greg Cook, 7/Dec/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -93,7 +93,7 @@
 /* Global definitions */
 
 /* CRC RevEng version string */
-#define VERSION "2.0.3"
+#define VERSION "2.1.0"
 
 /* bmpbit.c */
 typedef BMP_T bmp_t;
@@ -110,11 +110,12 @@ extern void setbmp(void);
 #define P_SPACE     32
 #define P_LTLBYT    64
 #define P_DIRECT   128
+#define P_EXHST    256
 
 /* class flags */
-#define P_CLBIT0   256
-#define P_CLBIT1   512
-#define P_SOLID   1024
+#define P_CLBIT0   512
+#define P_CLBIT1  1024
+#define P_SOLID   2048
 #define P_CLMASK (P_SOLID | P_CLBIT1 | P_CLBIT0)
 
 #define P_UNDFCL     0
@@ -222,14 +223,6 @@ extern void mmatch(model_t *model, int flags);
 extern model_t *reveng(const model_t *guess, const poly_t qpoly, int rflags, int args, const poly_t *argpolys);
 
 /* cli.c */
-#define C_INFILE  1
-#define C_NOPCK   2
-#define C_NOBFS   4
-#define C_RESULT  8
-
-#define BUFFER 32768
-#define GSCALE     4
-
 extern int main(int argc, char *argv[]);
 extern void ufound(const model_t *model);
 extern void uerror(const char *msg);

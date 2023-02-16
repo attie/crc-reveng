@@ -1,5 +1,5 @@
 /* reveng.c
- * Greg Cook, 9/May/2019
+ * Greg Cook, 7/Dec/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2019-04-30: brute-force short factor if shortest diff <= 2n
+/* 2019-12-07: skip equivalent forms
+ * 2019-04-30: brute-force short factor if shortest diff <= 2n
  * 2013-09-16: calini(), calout() work on shortest argument
  * 2013-06-11: added sequence number to uprog() calls
  * 2013-02-08: added polynomial range search
@@ -407,7 +408,7 @@ engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, c
 		/* Solve the matrix by Gaussian elimination.
 		 * The parity of the result, masked by each row, should be even.
 		 */
-		cy = 1;
+		cy = P_EXHST;
 		apoly = pclone(bpoly);
 		jptr = mat + dlen;
 		for(i=0UL; i<dlen; ++i) {
@@ -419,7 +420,7 @@ engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, c
 				if(pident(*jptr, pzero)) {
 					/* 0 to 1, no carry */
 					*jptr = bpoly;
-					cy = 0;
+					cy &= flags;
 				} else if(pident(*jptr, bpoly)) {
 					/* 1 to 0, carry forward */
 					*jptr = pzero;
@@ -435,11 +436,14 @@ engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, c
 		pfree(&apoly);
 	} while(!cy);
 	pfree(&pone);
-	pfree(&bpoly);
 
 	/* Free the matrix. */
 	for(jptr=mat; jptr < mat + (dlen << 1); ++jptr)
-		pfree(jptr);
+		if(pident(*jptr, bpoly))
+			*jptr = pzero;
+		else
+			pfree(jptr);
+	pfree(&bpoly);
 	free(mat);
 }
 

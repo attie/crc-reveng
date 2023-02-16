@@ -16,11 +16,11 @@ the web site are not for commercial redistribution. If you choose this
 method, direct your users to download and install the "System resources"
 from here:
 
-  http://www.riscosopen.org/content/downloads/other-zipfiles
+  https://www.riscosopen.org/content/downloads/common
 
 Direct link:
 
-  https://www.riscosopen.org/zipfiles/misc/PlingSystem.zip
+  https://www.riscosopen.org/zipfiles/platform/common/PlingSystem.zip
 
 You can also redistribute the web site version of !System with a
 non-commercial product, as long as you comply with the terms of the shared
@@ -30,8 +30,8 @@ the web site version of !System in this way.
 Special considerations for RISC OS Select
 =========================================
 
-Some versions of RISC OS Select, particulally 4.29, will require a patch
+Some versions of RISC OS Select, particularly 4.29, will require a patch
 before the 32bit Shared C Library can be loaded. Please note that currently
-RISCOS Ltd. will be unable to provide support any system while the new CLib
+RISCOS Ltd. will be unable to provide support to any system while the new CLib
 is in use. This patch can be applied by copying the !Boot shell in the
 'Select_429' directory over the existing !Boot.

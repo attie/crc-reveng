@@ -19,6 +19,12 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+2.1.0	7 December 2019
+	* Added -1 switch to skip equivalent forms.
+	* WIDTH may be specified before or after -i, -p, -q or -x.
+	* Warnings are given if POLY has no +1 term or if a search
+	  is attempted with fewer than 4 codeword samples.
+
 2.0.3	21 November 2019
 	* Added tomtorfs-wrapper.
 	* Revised poly class definitions and function entry conditions
