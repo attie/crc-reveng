@@ -1,5 +1,5 @@
 CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014  Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -73,7 +73,7 @@ be downloaded and documentation browsed:
 COMPILING
 
 Compiling CRC RevEng is straightforward: in the i386 GNU/Linux, MinGW
-and Raspbian environments, simply 'cd' to the directory containing the
+and Raspbian environments, simply cd to the directory containing the
 source files, and enter
 
 	make
@@ -99,7 +99,7 @@ command line.
 
 SYNOPSIS
 
-Usage:	reveng	-cdDesvhu? [-bBfFlLMrStVXy]
+Usage:	reveng	-cdDesvhu? [-bBfFlLMrStVXyz]
 		[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL]
 		[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT]
 		[STRING...]
@@ -121,7 +121,7 @@ Modifier switches:
 	-M non-augmenting algorithm	-r right-justified output
 	-S print spaces between chars	-t left-justified output
 	-V reverse algorithm only	-X print uppercase hex
-	-y low bytes first in files
+	-y low bytes first in files	-z raw binary STRINGs
 Mode switches:
 	-c calculate CRCs		-d dump algorithm parameters
 	-D list preset algorithms	-e echo (and reformat) input
@@ -277,16 +277,22 @@ and output:
 			before input to an 8-bit calculator.
 		-a  8	8-bit characters, raw (in files) or as pairs of
 			hex digits (in arguments).  This is the default.
-		-a  7	7-bit ASCII characters, one per 8-bit byte (in
-			files) or as pairs of hex digits (in arguments).
+		-a  7	7-bit characters, one per 8-bit byte (in files)
+			or as pairs of hex digits (in arguments).
 		-a  4	Single hex digits (not in files).
 		-a  3	Single octal digits 0-7.
 		-a  1	Single binary digits 0-1.
+		Note that text files containing digits will only be read
+		as expected if there is no trailing newline or other
+		whitespace, and if the digits are maskable in the system
+		character encoding (as digits 0-9 are in ASCII, EBCDIC
+		and Unicode.)  This is because the lowest bits of each
+		byte are extracted as described above.
 	-A OBITS
 		Specifies the number of bits per character in output.
 	-f
-		Arguments are file names; read input messages from the
-		named files.
+		Arguments are file names; input binary messages from the
+		file data.
 	-r
 		Right-justified output.  If a binary output message does
 		not consist of a whole number of characters, this switch
@@ -309,9 +315,12 @@ and output:
 	-X
 		Print uppercase hexadecimal characters.
 	-y
-		When reading messages from files and the -a option is
-		more than 8, this option specifies that the first byte
-		of each character contains the LSB.
+		When reading binary messages from files or arguments,
+		and the -a option is more than 8, this option specifies
+		that the first byte of each character contains the LSB.
+	-z
+		Arguments are raw binary strings; input binary messages
+		from the arguments.
 
 CALCULATING AND REVERSING CRCs
 
@@ -393,6 +402,14 @@ To confirm that it still passes the X.25 CRC:
 	reveng -m x-25 -c 436174732f2a88c02a2f72756c65
 	4e47
 
+For more flexible editing options, see Mark Adler's source file spoof.c
+(2014). "spoof.c takes an abbreviated description of the CRC, the
+exclusive-or of the current CRC of the message and the desired CRC, the
+length of the message, and a list of bit locations in a message, and
+tells you which of those bits should be inverted in the message to get
+the desired CRC. Note that it does not need the message itself, due to
+the linearity property of CRCs."
+
 				* * *
 
 In Stigge et al. (section 4.1) a polynomial q(x) is calculated as the
@@ -472,9 +489,10 @@ concatenated coefficients as a binary integer, the range can be up to
 upwards, or from one polynomial up to (but excluding) another.
 
 Polynomial range searching is enabled using [-p POLY] -q QPOLY, where
-POLY and QPOLY are hex strings.  -p, if given, must precede -q.  To
-search below a polynomial, up from a polynomial or between polynomials,
-use -q QPOLY, -p POLY -q 0, or -p POLY -q QPOLY, respectively.
+POLY and QPOLY are hex strings.  -p, if given, must precede -q.
+To start searching at a polynomial, use -p POLY -q 0.  To stop searching
+at a polynomial (exclusive), use -q QPOLY.  To search between two
+polynomial values, use -p POLY -q QPOLY.
 
 Range limiting does not apply to the initial check against the preset
 models, or to Init or XorOut values, which are computed using a fast,
@@ -495,9 +513,8 @@ NB: If an either-endian search is stopped while RefIn/RefOut = False
 then it takes two further command lines to complete the search: one
 big-endian range search, and one little-endian full search.
 
-	reveng -w 32 -p 50000000 -q 0 -b
+	reveng -w 32 -p 50000001 -q 0 -b
 		-s c98964f6b9 a5fa49f2fd 13370aee7df0
-		(or use 50000001 as printed in the progress message)
 	reveng -w 32 -l -s c98964f6b9 a5fa49f2fd 13370aee7df0
 
 The full list of search options is as follows:
@@ -566,13 +583,24 @@ input.
 
 Model reversal (-V, -v) makes little sense on crossed-endian models.
 
+CRC RevEng lacks a facility to generate code to implement specified
+algorithms.  Pycrc by Thomas Pircher (2014) is one suitable code
+generator; Mark Adler's crcany source package (2014) also produces
+source code when compiled and run, and references the author's CRC
+catalogue.
+
 REFERENCES
+
+Adler, Mark (24 December 2014). "zlib Home Site" (section "CRC (Cyclic
+Redundancy Check) Bonus Information").  Contains links to spoof.c.gz and
+crcany.tar.gz.
+  <http://zlib.net/>
 
 Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <http://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (14 January 2014).  "Catalogue of parametrised CRC
+Cook, Greg (31 March 2015).  "Catalogue of parametrised CRC
 algorithms".
   <http://reveng.sourceforge.net/crc-catalogue/>
 
@@ -592,6 +620,10 @@ International Conference on Dependable Systems and Networks: 145-154.
 doi:10.1109/DSN.2004.1311885.
   <http://www.ece.cmu.edu/~koopman/roses/dsn04/
     koopman04_crc_poly_embedded.pdf>
+
+Pircher, Thomas (4 December 2014). pycrc. Python based parametrised CRC
+calculator and C code generator.
+  <http://www.tty1.net/pycrc/>
 
 Stigge, Martin; Ploetz, Henryk; Mueller, Wolf; Redlich, Jens-Peter
 (May 2006).  "Reversing CRC -- Theory and Practice".  Berlin: Humboldt

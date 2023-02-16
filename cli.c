@@ -1,9 +1,9 @@
 /* cli.c
- * Greg Cook, 24/Jan/2014
+ * Greg Cook, 9/Apr/2015
  */
 
 /* CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014  Gregory Cook
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -21,7 +21,8 @@
  * along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 2013-09-16: do not search with -M
+/* 2015-04-03: added -z
+ * 2013-09-16: do not search with -M
  * 2013-06-11: uprog() suppresses first progress report
  * 2013-04-22: uprog() prints poly same as mtostr()
  * 2013-02-07: added -q, uprog(), removed -W, R_ODDLY
@@ -99,7 +100,7 @@ main(int argc, char *argv[]) {
 	SETBMP();
 
 	do {
-		c=getopt(argc, argv, "?A:BDFLMP:SVXa:bcdefhi:k:lm:p:q:rstuvw:x:y");
+		c=getopt(argc, argv, "?A:BDFLMP:SVXa:bcdefhi:k:lm:p:q:rstuvw:x:yz");
 		switch(c) {
 			case 'A': /* A: bits per output character */
 			case 'a': /* a: bits per character */
@@ -227,6 +228,9 @@ ippx:
 				goto ippx;
 			case 'y': /* y  little-endian byte order in files */
 				model.flags |= P_LTLBYT;
+				break;
+			case 'z': /* z  raw binary arguments */
+				model.flags |= P_DIRECT;
 				break;
 			case -1: /* no more options, continue */
 				;
@@ -548,7 +552,7 @@ usage(void) {
 			"Usage:\t");
 	fputs(myname, stderr);
 	fprintf(stderr,
-			"\t-cdDesvhu? [-bBfFlLMrStVXy]\n"
+			"\t-cdDesvhu? [-bBfFlLMrStVXyz]\n"
 			"\t\t[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL]\n"
 			"\t\t[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT]\n"
 			"\t\t[STRING...]\n"
@@ -572,7 +576,7 @@ usage(void) {
 			"\t-M non-augmenting algorithm\t-r right-justified output\n"
 			"\t-S print spaces between chars\t-t left-justified output\n"
 			"\t-V reverse algorithm only\t-X print uppercase hex\n"
-			"\t-y low bytes first in files\n");
+			"\t-y low bytes first in files\t-z raw binary STRINGs\n");
 	fprintf(stderr,
 			"Mode switches:\n"
 			"\t-c calculate CRCs\t\t-d dump algorithm parameters\n"
@@ -580,7 +584,7 @@ usage(void) {
 			"\t-s search for algorithm\t\t-v calculate reversed CRCs\n"
 			"\t-h | -u | -? show this help\n"
 			"\n"
-			"Copyright (C) 2010, 2011, 2012, 2013, 2014  Gregory Cook\n"
+			"Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook\n"
 			"This is free software; see the source for copying conditions.  There is NO\n"
 			"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 			"Version "

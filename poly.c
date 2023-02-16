@@ -1,9 +1,9 @@
 /* poly.c
- * Greg Cook, 27/Jan/2014
+ * Greg Cook, 9/Apr/2015
  */
 
 /* CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014  Gregory Cook
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -21,7 +21,8 @@
  * along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 2014-01-11: added LOFS(), RNDUP()
+/* 2015-04-03: added direct mode to strtop()
+ * 2014-01-11: added LOFS(), RNDUP()
  * 2013-09-16: SIZE(), IDX(), OFS() macros bitshift if BMP_POF2
  * 2013-02-07: conditional non-2^n fix, pmpar() return mask constant type
  * 2013-01-17: fixed pfirst(), plast() for non-2^n BMP_BIT
@@ -176,10 +177,15 @@ filtop(FILE *input, unsigned long length, int flags, int bperhx) {
 
 poly_t
 strtop(const char *string, int flags, int bperhx) {
-	/* Converts a hex string to a poly_t.
-	 * if P_REFIN, the hex string is little-endian, i.e.
-	 * bytes specify terms in ascending order.
-	 * bperhx specifies number of bits in each hex 'byte'
+	/* Converts a hex or character string to a poly_t.
+	 * Each character is converted to a hex nibble yielding 4 bits
+	 * unless P_DIRECT, when each character yields CHAR_BIT bits.
+	 * Nibbles and characters are accumulated left-to-right
+	 * unless P_DIRECT && P_LTLBYT, when they are accumulated
+	 * right-to-left without reflection.
+	 * As soon as at least bperhx bits are accumulated, the
+	 * rightmost bperhx bits are reflected (if P_REFIN)
+	 * and appended to the poly.  When !P_DIRECT:
 	 * bperhx=8 reads hex nibbles in pairs
 	 * bperhx=7 reads hex nibbles in pairs and discards
 	 *   b3 of first nibble
@@ -198,7 +204,7 @@ strtop(const char *string, int flags, int bperhx) {
 	bmp_t accu;
 	bmp_t mask = bperhx == BMP_BIT ? ~BMP_C(0) : (BMP_C(1) << bperhx) - BMP_C(1);
 	int pass, count, ofs;
-	char c;
+	int cmask = ~(~0 << CHAR_BIT), c;
 	const char *s;
 
 	poly_t poly = PZERO;
@@ -211,48 +217,56 @@ strtop(const char *string, int flags, int bperhx) {
 		count = 0;
 		accu = BMP_C(0);
 		while((c = *s++)) {
-			if(c == ' ' || c == '\t' || c == '\r' || c == '\n') continue;
-			accu <<= 4;
-			count += 4;
-			switch(c) {
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					accu |= (bmp_t) c - '0';
-					break;
-				case 'A':
-				case 'a':
-					accu |= BMP_C(0xa);
-					break;
-				case 'B':
-				case 'b':
-					accu |= BMP_C(0xb);
-					break;
-				case 'C':
-				case 'c':
-					accu |= BMP_C(0xc);
-					break;
-				case 'D':
-				case 'd':
-					accu |= BMP_C(0xd);
-					break;
-				case 'E':
-				case 'e':
-					accu |= BMP_C(0xe);
-					break;
-				case 'F':
-				case 'f':
-					accu |= BMP_C(0xf);
-					break;
-				default:
-					uerror("invalid character in hexadecimal argument");
+			if(flags & P_DIRECT) {
+				if(flags & P_LTLBYT)
+					accu |= (bmp_t) (c & cmask) << count;
+				else
+					accu = (accu << CHAR_BIT) | (bmp_t) (c & cmask);
+				count += CHAR_BIT;
+			} else {
+				if(c == ' ' || c == '\t' || c == '\r' || c == '\n') continue;
+				accu <<= 4;
+				count += 4;
+				switch(c) {
+					case '0':
+					case '1':
+					case '2':
+					case '3':
+					case '4':
+					case '5':
+					case '6':
+					case '7':
+					case '8':
+					case '9':
+						accu |= (bmp_t) c - '0';
+						break;
+					case 'A':
+					case 'a':
+						accu |= BMP_C(0xa);
+						break;
+					case 'B':
+					case 'b':
+						accu |= BMP_C(0xb);
+						break;
+					case 'C':
+					case 'c':
+						accu |= BMP_C(0xc);
+						break;
+					case 'D':
+					case 'd':
+						accu |= BMP_C(0xd);
+						break;
+					case 'E':
+					case 'e':
+						accu |= BMP_C(0xe);
+						break;
+					case 'F':
+					case 'f':
+						accu |= BMP_C(0xf);
+						break;
+					default:
+						uerror("invalid character in hexadecimal argument");
+				}
 			}
 
 			if(count >= bperhx) {
@@ -272,6 +286,7 @@ strtop(const char *string, int flags, int bperhx) {
 					poly.bitmap[idx] |= accu << ofs;
 					if(ofs + bperhx > BMP_BIT)
 						poly.bitmap[idx-1] |= accu >> (BMP_BIT - ofs);
+					accu = BMP_C(0); /* only needed for P_LTLBYT */
 				}
 			}
 		}

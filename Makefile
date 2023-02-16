@@ -1,9 +1,9 @@
 #!/usr/bin/make
 # Makefile
-# Greg Cook, 11/Feb/2014
+# Greg Cook, 9/Apr/2015
 
 # CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-# Copyright (C) 2010, 2011, 2012, 2013, 2014  Gregory Cook
+# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
 #
 # This file is part of CRC RevEng.
 #

@@ -1,9 +1,9 @@
 /* reveng.h
- * Greg Cook, 27/Jan/2014
+ * Greg Cook, 9/Apr/2015
  */
 
 /* CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014  Gregory Cook
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -92,7 +92,7 @@
 /* Global definitions */
 
 /* CRC RevEng version string */
-#define VERSION "1.2.0"
+#define VERSION "1.3.0"
 
 /* bmpbit.c */
 typedef BMP_T bmp_t;
@@ -101,13 +101,14 @@ extern int bmpbit, bmpsub;
 extern void setbmp(void);
 
 /* poly.c */
-#define P_REFIN   1
-#define P_REFOUT  2
-#define P_MULXN   4
-#define P_RTJUST  8
-#define P_UPPER  16
-#define P_SPACE  32
-#define P_LTLBYT 64
+#define P_REFIN      1
+#define P_REFOUT     2
+#define P_MULXN      4
+#define P_RTJUST     8
+#define P_UPPER     16
+#define P_SPACE     32
+#define P_LTLBYT    64
+#define P_DIRECT   128
 
 /* default flags */
 #define P_BE     (P_RTJUST | P_MULXN)
@@ -161,7 +162,7 @@ extern int pmpar(const poly_t poly, const poly_t mask);
 extern int pident(const poly_t a, const poly_t b);
 
 /* model.c */
-#define M_OVERWR 128
+#define M_OVERWR   256
 
 typedef struct {
 	poly_t spoly;		/* polynomial with highest-order term removed. length determines CRC width */
@@ -187,12 +188,12 @@ extern void mrev(model_t *model);
 extern void mnovel(model_t *model);
 
 /* reveng.c */
-#define R_HAVEP   256
-#define R_HAVEI   512
-#define R_HAVERI 1024
-#define R_HAVERO 2048
-#define R_HAVEX  4096
-#define R_HAVEQ  8192
+#define R_HAVEP    512
+#define R_HAVEI   1024
+#define R_HAVERI  2048
+#define R_HAVERO  4096
+#define R_HAVEX   8192
+#define R_HAVEQ  16384
 
 #define R_SPMASK 0x7FFFFFFUL
 

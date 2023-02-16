@@ -1,5 +1,5 @@
 CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014  Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -17,6 +17,9 @@ You should have received a copy of the GNU General Public License
 along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
+
+1.3.0	9 April 2015
+	* Added -z switch to accept direct binary strings.
 
 1.2.0a  11 February 2014
 	* ARM Tube OS binary included.
