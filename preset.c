@@ -1,5 +1,5 @@
 /* preset.c
- * Greg Cook, 24/Aug/2022
+ * Greg Cook, 27/Aug/2022
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2022-08-24: added CRC=64/REDIS
+/* 2022-08-27: added alias CRC-16/BLUETOOTH
+ * 2022-08-24: added CRC=64/REDIS
  * 2022-05-08: added CRC-16/M17
  * 2022-01-11: added CRC-32/MEF, CRC-64/MS
  * 2021-12-23: added CRC-8/HITAG
@@ -523,117 +524,117 @@ static const struct malias aliases[];
  * Sorted by left-justified polynomial for bsearch().
  */
 static const struct mpreset models[] = {
-	{64UL, b64,     b64a,    P_LE   | P_CONFIR, b64a,    b64b,    b64c,    aliases+133},	/*   0 */
-	{32UL, b32+  0, 0,       P_BE   | P_CONFIR, 0,       b32+153, 0,       aliases+110},	/*   1 */
-	{40UL, b40,     0,       P_BE   | P_ACADEM, b40a,    b40b,    b40c,    aliases+118},	/*   2 */
-	{24UL, b32+  3, b32+ 76, P_LE   | P_ATTEST, 0,       b32+158, 0,       aliases+ 78},	/*   3 */
-	{32UL, b32+  8, 0,       P_BE   | P_ATTEST, b32+215, b32+ 94, b32+164, aliases+100},	/*   4 */
-	{32UL, b32+  8, b32+215, P_BE   | P_ATTEST, 0,       b32+  7, 0,       aliases+107},	/*   5 */
-	{32UL, b32+  8, b32+215, P_BE   | P_ATTEST, b32+215, b32+202, b32+164, aliases+ 97},	/*   6 */
-	{32UL, b32+  8, b32+215, P_LE   | P_CONFIR, 0,       b32+ 56, 0,       aliases+105},	/*   7 */
-	{32UL, b32+  8, b32+215, P_LE   | P_ATTEST, b32+215, b32+167, b32+181, aliases+104},	/*   8 */
-	{16UL, b32+  9, 0,       P_BE   | P_ATTEST, 0,       b32+  5, 0,       aliases+ 36},	/*   9 */
-	{16UL, b32+  9, 0,       P_BE   | P_ATTEST, b32+  1, b32+  4, b32+  9, aliases+ 35},	/*  10 */
-	{ 8UL, b32+ 10, 0,       P_BE   | P_ATTEST, 0,       b32+195, 0,       aliases+164},	/*  11 */
-	{ 8UL, b32+ 10, 0,       P_BE   | P_ACADEM, b32+ 75, b32+130, b32+138, aliases+153},	/*  12 */
-	{ 8UL, b32+ 10, b32+207, P_LE   | P_ACADEM, 0,       b32+170, 0,       aliases+162},	/*  13 */
-	{16UL, b32+ 11, b32+211, P_LE   | P_ATTEST, 0,       b32+128, 0,       aliases+ 59},	/*  14 */
-	{31UL, b32+ 12, b32+214, P_BE   | P_CONFIR, b32+214, b32+ 26, b32+125, aliases+ 89},	/*  15 */
-	{ 6UL, b32+ 14, 0,       P_LE   | P_ACADEM, 0,       b32+ 25, 0,       aliases+127},	/*  16 */
-	{82UL, b82,     0,       P_LE   | P_ATTEST, 0,       b82a,    0,       aliases+167},	/*  17 */
-	{16UL, b32+ 18, 0,       P_BE   | P_ATTEST, 0,       b32+ 53, 0,       aliases+ 74},	/*  18 */
-	{16UL, b32+ 18, 0,       P_BE   | P_ATTEST, b32+211, b32+169, b32+ 29, aliases+ 42},	/*  19 */
-	{16UL, b32+ 18, 0,       P_LE   | P_ATTEST, 0,       b32+ 38, 0,       aliases+ 50},	/*  20 */
-	{16UL, b32+ 18, b32+ 29, P_BE   | P_ATTEST, 0,       b32+186, 0,       aliases+ 64},	/*  21 */
-	{16UL, b32+ 18, b32+112, P_LE   | P_ATTEST, 0,       b32+ 43, 0,       aliases+ 67},	/*  22 */
-	{16UL, b32+ 18, b32+142, P_LE   | P_THIRDP, 0,       b32+ 83, 0,       aliases+ 63},	/*  23 */
-	{16UL, b32+ 18, b32+162, P_LE   | P_ATTEST, 0,       b32+155, 0,       aliases+ 48},	/*  24 */
-	{16UL, b32+ 18, b32+211, P_BE   | P_ATTEST, 0,       b32+ 47, 0,       aliases+ 44},	/*  25 */
-	{16UL, b32+ 18, b32+211, P_BE   | P_ATTEST, b32+211, b32+178, b32+ 29, aliases+ 41},	/*  26 */
-	{16UL, b32+ 18, b32+211, P_LE   | P_ATTEST, 0,       b32+ 89, 0,       aliases+ 57},	/*  27 */
-	{16UL, b32+ 18, b32+211, P_LE   | P_ATTEST, b32+211, b32+118, b32+193, aliases+ 45},	/*  28 */
-	{ 7UL, b32+ 19, 0,       P_BE   | P_ACADEM, 0,       b32+189, 0,       aliases+139},	/*  29 */
-	{ 6UL, b32+ 27, b32+201, P_BE   | P_ACADEM, 0,       b32+191, 0,       aliases+125},	/*  30 */
-	{ 8UL, b32+ 28, 0,       P_BE   | P_ACADEM, 0,       b32+ 57, 0,       aliases+150},	/*  31 */
-	{ 8UL, b32+ 28, b32+163, P_BE   | P_ATTEST, 0,       b32+122, 0,       aliases+159},	/*  32 */
-	{ 8UL, b32+ 28, b32+203, P_BE   | P_ATTEST, 0,       b32+ 98, 0,       aliases+154},	/*  33 */
-	{ 8UL, b32+ 28, b32+207, P_BE   | P_ATTEST, 0,       b32+144, 0,       aliases+152},	/*  34 */
-	{ 8UL, b32+ 28, b32+207, P_BE   | P_ATTEST, b32+207, b32+ 70, b32+161, aliases+163},	/*  35 */
-	{ 8UL, b32+ 28, b32+207, P_LE   | P_ATTEST, 0,       b32+120, 0,       aliases+165},	/*  36 */
-	{16UL, b32+ 30, b32+211, P_BE   | P_ATTEST, b32+211, b32+135, b32+185, aliases+ 62},	/*  37 */
-	{32UL, b32+ 31, b32+215, P_LE   | P_ATTEST, b32+215, b32+184, b32+150, aliases+103},	/*  38 */
+	{64UL, b64,     b64a,    P_LE   | P_CONFIR, b64a,    b64b,    b64c,    aliases+134},	/*   0 */
+	{32UL, b32+  0, 0,       P_BE   | P_CONFIR, 0,       b32+153, 0,       aliases+111},	/*   1 */
+	{40UL, b40,     0,       P_BE   | P_ACADEM, b40a,    b40b,    b40c,    aliases+119},	/*   2 */
+	{24UL, b32+  3, b32+ 76, P_LE   | P_ATTEST, 0,       b32+158, 0,       aliases+ 79},	/*   3 */
+	{32UL, b32+  8, 0,       P_BE   | P_ATTEST, b32+215, b32+ 94, b32+164, aliases+101},	/*   4 */
+	{32UL, b32+  8, b32+215, P_BE   | P_ATTEST, 0,       b32+  7, 0,       aliases+108},	/*   5 */
+	{32UL, b32+  8, b32+215, P_BE   | P_ATTEST, b32+215, b32+202, b32+164, aliases+ 98},	/*   6 */
+	{32UL, b32+  8, b32+215, P_LE   | P_CONFIR, 0,       b32+ 56, 0,       aliases+106},	/*   7 */
+	{32UL, b32+  8, b32+215, P_LE   | P_ATTEST, b32+215, b32+167, b32+181, aliases+105},	/*   8 */
+	{16UL, b32+  9, 0,       P_BE   | P_ATTEST, 0,       b32+  5, 0,       aliases+ 37},	/*   9 */
+	{16UL, b32+  9, 0,       P_BE   | P_ATTEST, b32+  1, b32+  4, b32+  9, aliases+ 36},	/*  10 */
+	{ 8UL, b32+ 10, 0,       P_BE   | P_ATTEST, 0,       b32+195, 0,       aliases+165},	/*  11 */
+	{ 8UL, b32+ 10, 0,       P_BE   | P_ACADEM, b32+ 75, b32+130, b32+138, aliases+154},	/*  12 */
+	{ 8UL, b32+ 10, b32+207, P_LE   | P_ACADEM, 0,       b32+170, 0,       aliases+163},	/*  13 */
+	{16UL, b32+ 11, b32+211, P_LE   | P_ATTEST, 0,       b32+128, 0,       aliases+ 60},	/*  14 */
+	{31UL, b32+ 12, b32+214, P_BE   | P_CONFIR, b32+214, b32+ 26, b32+125, aliases+ 90},	/*  15 */
+	{ 6UL, b32+ 14, 0,       P_LE   | P_ACADEM, 0,       b32+ 25, 0,       aliases+128},	/*  16 */
+	{82UL, b82,     0,       P_LE   | P_ATTEST, 0,       b82a,    0,       aliases+168},	/*  17 */
+	{16UL, b32+ 18, 0,       P_BE   | P_ATTEST, 0,       b32+ 53, 0,       aliases+ 75},	/*  18 */
+	{16UL, b32+ 18, 0,       P_BE   | P_ATTEST, b32+211, b32+169, b32+ 29, aliases+ 43},	/*  19 */
+	{16UL, b32+ 18, 0,       P_LE   | P_ATTEST, 0,       b32+ 38, 0,       aliases+ 51},	/*  20 */
+	{16UL, b32+ 18, b32+ 29, P_BE   | P_ATTEST, 0,       b32+186, 0,       aliases+ 65},	/*  21 */
+	{16UL, b32+ 18, b32+112, P_LE   | P_ATTEST, 0,       b32+ 43, 0,       aliases+ 68},	/*  22 */
+	{16UL, b32+ 18, b32+142, P_LE   | P_THIRDP, 0,       b32+ 83, 0,       aliases+ 64},	/*  23 */
+	{16UL, b32+ 18, b32+162, P_LE   | P_ATTEST, 0,       b32+155, 0,       aliases+ 49},	/*  24 */
+	{16UL, b32+ 18, b32+211, P_BE   | P_ATTEST, 0,       b32+ 47, 0,       aliases+ 45},	/*  25 */
+	{16UL, b32+ 18, b32+211, P_BE   | P_ATTEST, b32+211, b32+178, b32+ 29, aliases+ 42},	/*  26 */
+	{16UL, b32+ 18, b32+211, P_LE   | P_ATTEST, 0,       b32+ 89, 0,       aliases+ 58},	/*  27 */
+	{16UL, b32+ 18, b32+211, P_LE   | P_ATTEST, b32+211, b32+118, b32+193, aliases+ 46},	/*  28 */
+	{ 7UL, b32+ 19, 0,       P_BE   | P_ACADEM, 0,       b32+189, 0,       aliases+140},	/*  29 */
+	{ 6UL, b32+ 27, b32+201, P_BE   | P_ACADEM, 0,       b32+191, 0,       aliases+126},	/*  30 */
+	{ 8UL, b32+ 28, 0,       P_BE   | P_ACADEM, 0,       b32+ 57, 0,       aliases+151},	/*  31 */
+	{ 8UL, b32+ 28, b32+163, P_BE   | P_ATTEST, 0,       b32+122, 0,       aliases+160},	/*  32 */
+	{ 8UL, b32+ 28, b32+203, P_BE   | P_ATTEST, 0,       b32+ 98, 0,       aliases+155},	/*  33 */
+	{ 8UL, b32+ 28, b32+207, P_BE   | P_ATTEST, 0,       b32+144, 0,       aliases+153},	/*  34 */
+	{ 8UL, b32+ 28, b32+207, P_BE   | P_ATTEST, b32+207, b32+ 70, b32+161, aliases+164},	/*  35 */
+	{ 8UL, b32+ 28, b32+207, P_LE   | P_ATTEST, 0,       b32+120, 0,       aliases+166},	/*  36 */
+	{16UL, b32+ 30, b32+211, P_BE   | P_ATTEST, b32+211, b32+135, b32+185, aliases+ 63},	/*  37 */
+	{32UL, b32+ 31, b32+215, P_LE   | P_ATTEST, b32+215, b32+184, b32+150, aliases+104},	/*  38 */
 	{14UL, b32+ 35, 0,       P_LE   | P_ATTEST, 0,       b32+ 36, 0,       aliases+ 17},	/*  39 */
-	{64UL, b64d,    b64a,    P_LE   | P_ATTEST, 0,       b64e,    0,       aliases+134},	/*  40 */
-	{ 5UL, b32+ 46, b32+200, P_LE   | P_THIRDP, b32+200, b32+165, b32+ 49, aliases+123},	/*  41 */
-	{ 8UL, b32+ 48, 0,       P_BE   | P_ATTEST, 0,       b32+ 61, 0,       aliases+161},	/*  42 */
-	{ 8UL, b32+ 48, b32+207, P_BE   | P_ATTEST, b32+207, b32+182, b32+ 63, aliases+144},	/*  43 */
-	{ 4UL, b32+ 49, 0,       P_LE   | P_ACADEM, 0,       b32+ 90, 0,       aliases+115},	/*  44 */
-	{ 4UL, b32+ 49, b32+192, P_BE   | P_ACADEM, b32+192, b32+140, b32+ 33, aliases+116},	/*  45 */
-	{ 8UL, b32+ 51, 0,       P_LE   | P_ATTEST, 0,       b32+130, 0,       aliases+158},	/*  46 */
-	{ 8UL, b32+ 51, b32+207, P_BE   | P_ATTEST, 0,       b32+199, 0,       aliases+160},	/*  47 */
-	{24UL, b32+ 54, b32+212, P_BE   | P_ACADEM, b32+212, b32+148, b32+ 21, aliases+ 81},	/*  48 */
-	{ 8UL, b32+ 59, 0,       P_LE   | P_ATTEST, 0,       b32+ 22, 0,       aliases+147},	/*  49 */
-	{16UL, b32+ 60, 0,       P_BE   | P_CONFIR, b32+211, b32+159, b32+131, aliases+ 38},	/*  50 */
-	{16UL, b32+ 60, 0,       P_LE   | P_CONFIR, b32+211, b32+190, b32+ 86, aliases+ 37},	/*  51 */
-	{64UL, b64f,    0,       P_BE   | P_ACADEM, 0,       b64g,    0,       aliases+131},	/*  52 */
-	{64UL, b64f,    b64a,    P_BE   | P_CONFIR, b64a,    b64h,    b64i,    aliases+136},	/*  53 */
-	{64UL, b64f,    b64a,    P_LE   | P_ATTEST, b64a,    b64j,    b64k,    aliases+137},	/*  54 */
-	{ 5UL, b32+ 66, b32+ 66, P_BE   | P_ATTEST, 0,       0,       0,       aliases+120},	/*  55 */
-	{ 8UL, b32+ 67, 0,       P_BE   | P_ACADEM, b32+207, b32+119, b32+ 74, aliases+151},	/*  56 */
-	{16UL, b32+ 77, 0,       P_BE   | P_ATTEST, 0,       b32+ 78, 0,       aliases+ 60},	/*  57 */
-	{16UL, b32+ 77, b32+211, P_BE   | P_ATTEST, 0,       b32+ 96, 0,       aliases+ 54},	/*  58 */
+	{64UL, b64d,    b64a,    P_LE   | P_ATTEST, 0,       b64e,    0,       aliases+135},	/*  40 */
+	{ 5UL, b32+ 46, b32+200, P_LE   | P_THIRDP, b32+200, b32+165, b32+ 49, aliases+124},	/*  41 */
+	{ 8UL, b32+ 48, 0,       P_BE   | P_ATTEST, 0,       b32+ 61, 0,       aliases+162},	/*  42 */
+	{ 8UL, b32+ 48, b32+207, P_BE   | P_ATTEST, b32+207, b32+182, b32+ 63, aliases+145},	/*  43 */
+	{ 4UL, b32+ 49, 0,       P_LE   | P_ACADEM, 0,       b32+ 90, 0,       aliases+116},	/*  44 */
+	{ 4UL, b32+ 49, b32+192, P_BE   | P_ACADEM, b32+192, b32+140, b32+ 33, aliases+117},	/*  45 */
+	{ 8UL, b32+ 51, 0,       P_LE   | P_ATTEST, 0,       b32+130, 0,       aliases+159},	/*  46 */
+	{ 8UL, b32+ 51, b32+207, P_BE   | P_ATTEST, 0,       b32+199, 0,       aliases+161},	/*  47 */
+	{24UL, b32+ 54, b32+212, P_BE   | P_ACADEM, b32+212, b32+148, b32+ 21, aliases+ 82},	/*  48 */
+	{ 8UL, b32+ 59, 0,       P_LE   | P_ATTEST, 0,       b32+ 22, 0,       aliases+148},	/*  49 */
+	{16UL, b32+ 60, 0,       P_BE   | P_CONFIR, b32+211, b32+159, b32+131, aliases+ 39},	/*  50 */
+	{16UL, b32+ 60, 0,       P_LE   | P_CONFIR, b32+211, b32+190, b32+ 86, aliases+ 38},	/*  51 */
+	{64UL, b64f,    0,       P_BE   | P_ACADEM, 0,       b64g,    0,       aliases+132},	/*  52 */
+	{64UL, b64f,    b64a,    P_BE   | P_CONFIR, b64a,    b64h,    b64i,    aliases+137},	/*  53 */
+	{64UL, b64f,    b64a,    P_LE   | P_ATTEST, b64a,    b64j,    b64k,    aliases+138},	/*  54 */
+	{ 5UL, b32+ 66, b32+ 66, P_BE   | P_ATTEST, 0,       0,       0,       aliases+121},	/*  55 */
+	{ 8UL, b32+ 67, 0,       P_BE   | P_ACADEM, b32+207, b32+119, b32+ 74, aliases+152},	/*  56 */
+	{16UL, b32+ 77, 0,       P_BE   | P_ATTEST, 0,       b32+ 78, 0,       aliases+ 61},	/*  57 */
+	{16UL, b32+ 77, b32+211, P_BE   | P_ATTEST, 0,       b32+ 96, 0,       aliases+ 55},	/*  58 */
 	{10UL, b32+ 79, 0,       P_BE   | P_ACADEM, b32+208, b32+ 68, b32+ 52, aliases+  6},	/*  59 */
-	{24UL, b32+ 80, b32+137, P_BE   | P_ATTEST, 0,       b32+ 32, 0,       aliases+ 80},	/*  60 */
-	{24UL, b32+ 80, b32+205, P_BE   | P_ATTEST, 0,       b32+ 97, 0,       aliases+ 79},	/*  61 */
-	{ 3UL, b32+ 81, 0,       P_BE   | P_ACADEM, b32+183, b32+ 99, b32+ 62, aliases+ 86},	/*  62 */
-	{ 3UL, b32+ 81, b32+183, P_LE   | P_ACADEM, 0,       b32+156, 0,       aliases+ 87},	/*  63 */
+	{24UL, b32+ 80, b32+137, P_BE   | P_ATTEST, 0,       b32+ 32, 0,       aliases+ 81},	/*  60 */
+	{24UL, b32+ 80, b32+205, P_BE   | P_ATTEST, 0,       b32+ 97, 0,       aliases+ 80},	/*  61 */
+	{ 3UL, b32+ 81, 0,       P_BE   | P_ACADEM, b32+183, b32+ 99, b32+ 62, aliases+ 87},	/*  62 */
+	{ 3UL, b32+ 81, b32+183, P_LE   | P_ACADEM, 0,       b32+156, 0,       aliases+ 88},	/*  63 */
 	{11UL, b32+ 82, 0,       P_BE   | P_ACADEM, 0,       b32+ 15, 0,       aliases+ 10},	/*  64 */
-	{ 6UL, b32+ 84, 0,       P_LE   | P_ATTEST, 0,       b32+121, 0,       aliases+126},	/*  65 */
-	{16UL, b32+ 88, 0,       P_BE   | P_THIRDP, 0,       b32+154, 0,       aliases+ 52},	/*  66 */
+	{ 6UL, b32+ 84, 0,       P_LE   | P_ATTEST, 0,       b32+121, 0,       aliases+127},	/*  65 */
+	{16UL, b32+ 88, 0,       P_BE   | P_THIRDP, 0,       b32+154, 0,       aliases+ 53},	/*  66 */
 	{11UL, b32+ 91, b32+  6, P_BE   | P_ATTEST, 0,       b32+146, 0,       aliases+  9},	/*  67 */
-	{32UL, b32+ 92, b32+215, P_LE   | P_ATTEST, 0,       b32+173, 0,       aliases+106},	/*  68 */
-	{16UL, b32+ 93, 0,       P_BE   | P_ATTEST, 0,       b32+ 37, 0,       aliases+ 61},	/*  69 */
-	{24UL, b32+100, 0,       P_BE   | P_ACADEM, 0,       b32+ 40, 0,       aliases+ 83},	/*  70 */
-	{24UL, b32+100, b32+212, P_BE   | P_ATTEST, b32+212, b32+ 34, b32+104, aliases+ 85},	/*  71 */
-	{32UL, b32+101, 0,       P_LE   | P_ACADEM, 0,       b32+ 87, 0,       aliases+ 99},	/*  72 */
-	{16UL, b32+102, 0,       P_BE   | P_ATTEST, 0,       b32+206, 0,       aliases+ 68},	/*  73 */
+	{32UL, b32+ 92, b32+215, P_LE   | P_ATTEST, 0,       b32+173, 0,       aliases+107},	/*  68 */
+	{16UL, b32+ 93, 0,       P_BE   | P_ATTEST, 0,       b32+ 37, 0,       aliases+ 62},	/*  69 */
+	{24UL, b32+100, 0,       P_BE   | P_ACADEM, 0,       b32+ 40, 0,       aliases+ 84},	/*  70 */
+	{24UL, b32+100, b32+212, P_BE   | P_ATTEST, b32+212, b32+ 34, b32+104, aliases+ 86},	/*  71 */
+	{32UL, b32+101, 0,       P_LE   | P_ACADEM, 0,       b32+ 87, 0,       aliases+100},	/*  72 */
+	{16UL, b32+102, 0,       P_BE   | P_ATTEST, 0,       b32+206, 0,       aliases+ 69},	/*  73 */
 	{16UL, b32+102, 0,       P_LE   | P_ATTEST, 0,       b32+151, 0,       aliases+ 24},	/*  74 */
-	{16UL, b32+102, 0,       P_LE   | P_ATTEST, b32+211, b32+ 64, b32+141, aliases+ 56},	/*  75 */
-	{16UL, b32+102, b32+103, P_BE   | P_ATTEST, 0,       b32+127, 0,       aliases+ 34},	/*  76 */
-	{16UL, b32+102, b32+211, P_BE   | P_THIRDP, 0,       b32+139, 0,       aliases+ 32},	/*  77 */
-	{16UL, b32+102, b32+211, P_LE   | P_ATTEST, 0,       b32+ 71, 0,       aliases+ 58},	/*  78 */
-	{16UL, b32+102, b32+211, P_LE   | P_THIRDP, b32+211, b32+147, b32+141, aliases+ 69},	/*  79 */
+	{16UL, b32+102, 0,       P_LE   | P_ATTEST, b32+211, b32+ 64, b32+141, aliases+ 57},	/*  75 */
+	{16UL, b32+102, b32+103, P_BE   | P_ATTEST, 0,       b32+127, 0,       aliases+ 35},	/*  76 */
+	{16UL, b32+102, b32+211, P_BE   | P_THIRDP, 0,       b32+139, 0,       aliases+ 33},	/*  77 */
+	{16UL, b32+102, b32+211, P_LE   | P_ATTEST, 0,       b32+ 71, 0,       aliases+ 59},	/*  78 */
+	{16UL, b32+102, b32+211, P_LE   | P_THIRDP, b32+211, b32+147, b32+141, aliases+ 70},	/*  79 */
 	{14UL, b32+105, 0,       P_BE   | P_ACADEM, b32+210, b32+160, b32+ 16, aliases+ 18},	/*  80 */
-	{30UL, b32+106, b32+213, P_BE   | P_ACADEM, b32+213, b32+ 20, b32+175, aliases+ 88},	/*  81 */
+	{30UL, b32+106, b32+213, P_BE   | P_ACADEM, b32+213, b32+ 20, b32+175, aliases+ 89},	/*  81 */
 	{12UL, b32+107, 0,       P_BE   | P_ACADEM, 0,       b32+197, 0,       aliases+ 13},	/*  82 */
 	{12UL, b32+107, 0,       P_BELE | P_ACADEM, 0,       b32+180, 0,       aliases+ 15},	/*  83 */
-	{32UL, b32+108, 0,       P_BE   | P_ATTEST, 0,       b32+ 50, 0,       aliases+ 93},	/*  84 */
-	{21UL, b32+109, 0,       P_BE   | P_ACADEM, 0,       b32+ 95, 0,       aliases+ 76},	/*  85 */
-	{24UL, b32+110, 0,       P_BE   | P_ACADEM, 0,       b32+168, 0,       aliases+ 82},	/*  86 */
-	{24UL, b32+110, b32+149, P_BE   | P_ATTEST, 0,       b32+ 39, 0,       aliases+ 84},	/*  87 */
-	{ 7UL, b32+113, 0,       P_BE   | P_ACADEM, 0,       b32+157, 0,       aliases+141},	/*  88 */
+	{32UL, b32+108, 0,       P_BE   | P_ATTEST, 0,       b32+ 50, 0,       aliases+ 94},	/*  84 */
+	{21UL, b32+109, 0,       P_BE   | P_ACADEM, 0,       b32+ 95, 0,       aliases+ 77},	/*  85 */
+	{24UL, b32+110, 0,       P_BE   | P_ACADEM, 0,       b32+168, 0,       aliases+ 83},	/*  86 */
+	{24UL, b32+110, b32+149, P_BE   | P_ATTEST, 0,       b32+ 39, 0,       aliases+ 85},	/*  87 */
+	{ 7UL, b32+113, 0,       P_BE   | P_ACADEM, 0,       b32+157, 0,       aliases+142},	/*  88 */
 	{15UL, b32+114, 0,       P_BE   | P_ACADEM, 0,       b32+ 13, 0,       aliases+ 20},	/*  89 */
-	{16UL, b32+115, 0,       P_BE   | P_ATTEST, 0,       b32+172, 0,       aliases+ 65},	/*  90 */
+	{16UL, b32+115, 0,       P_BE   | P_ATTEST, 0,       b32+172, 0,       aliases+ 66},	/*  90 */
 	{10UL, b32+116, 0,       P_BE   | P_ATTEST, 0,       b32+ 85, 0,       aliases+  4},	/*  91 */
-	{ 8UL, b32+123, 0,       P_BE   | P_ACADEM, 0,       b32+189, 0,       aliases+156},	/*  92 */
-	{ 8UL, b32+123, 0,       P_LE   | P_THIRDP, 0,       b32+ 41, 0,       aliases+166},	/*  93 */
-	{ 8UL, b32+123, b32+207, P_BE   | P_ACADEM, 0,       b32+179, 0,       aliases+146},	/*  94 */
-	{ 6UL, b32+124, b32+201, P_BE   | P_ATTEST, 0,       b32+ 55, 0,       aliases+124},	/*  95 */
-	{ 7UL, b32+126, b32+204, P_LE   | P_ACADEM, 0,       b32+132, 0,       aliases+140},	/*  96 */
-	{16UL, b32+129, 0,       P_BE   | P_CONFIR, 0,       b32+ 17, 0,       aliases+ 66},	/*  97 */
-	{ 8UL, b32+133, 0,       P_LE   | P_ATTEST, 0,       b32+ 42, 0,       aliases+145},	/*  98 */
-	{ 5UL, b32+134, 0,       P_LE   | P_ACADEM, 0,       b32+ 58, 0,       aliases+121},	/*  99 */
-	{32UL, b32+136, b32+215, P_LE   | P_CONFIR, b32+215, b32+111, b32+ 65, aliases+ 96},	/* 100 */
-	{64UL, b64l,    0,       P_LE   | P_ACADEM, 0,       b64m,    0,       aliases+135},	/* 101 */
-	{17UL, b32+145, 0,       P_BE   | P_ACADEM, 0,       b32+ 44, 0,       aliases+ 75},	/* 102 */
-	{ 6UL, b32+152, 0,       P_BE   | P_ACADEM, b32+201, b32+ 72, b32+188, aliases+128},	/* 103 */
-	{16UL, b32+166, b32+211, P_BE   | P_ACADEM, 0,       b32+ 73, 0,       aliases+ 31},	/* 104 */
+	{ 8UL, b32+123, 0,       P_BE   | P_ACADEM, 0,       b32+189, 0,       aliases+157},	/*  92 */
+	{ 8UL, b32+123, 0,       P_LE   | P_THIRDP, 0,       b32+ 41, 0,       aliases+167},	/*  93 */
+	{ 8UL, b32+123, b32+207, P_BE   | P_ACADEM, 0,       b32+179, 0,       aliases+147},	/*  94 */
+	{ 6UL, b32+124, b32+201, P_BE   | P_ATTEST, 0,       b32+ 55, 0,       aliases+125},	/*  95 */
+	{ 7UL, b32+126, b32+204, P_LE   | P_ACADEM, 0,       b32+132, 0,       aliases+141},	/*  96 */
+	{16UL, b32+129, 0,       P_BE   | P_CONFIR, 0,       b32+ 17, 0,       aliases+ 67},	/*  97 */
+	{ 8UL, b32+133, 0,       P_LE   | P_ATTEST, 0,       b32+ 42, 0,       aliases+146},	/*  98 */
+	{ 5UL, b32+134, 0,       P_LE   | P_ACADEM, 0,       b32+ 58, 0,       aliases+122},	/*  99 */
+	{32UL, b32+136, b32+215, P_LE   | P_CONFIR, b32+215, b32+111, b32+ 65, aliases+ 97},	/* 100 */
+	{64UL, b64l,    0,       P_LE   | P_ACADEM, 0,       b64m,    0,       aliases+136},	/* 101 */
+	{17UL, b32+145, 0,       P_BE   | P_ACADEM, 0,       b32+ 44, 0,       aliases+ 76},	/* 102 */
+	{ 6UL, b32+152, 0,       P_BE   | P_ACADEM, b32+201, b32+ 72, b32+188, aliases+129},	/* 103 */
+	{16UL, b32+166, b32+211, P_BE   | P_ACADEM, 0,       b32+ 73, 0,       aliases+ 32},	/* 104 */
 	{15UL, b32+171, 0,       P_BE   | P_ATTEST, b32+  2, b32+ 69, b32+171, aliases+ 21},	/* 105 */
 	{12UL, b32+174, 0,       P_BE   | P_ACADEM, b32+209, b32+143, b32+ 24, aliases+ 14},	/* 106 */
-	{ 8UL, b32+177, 0,       P_BE   | P_ACADEM, 0,       b32+152, 0,       aliases+148},	/* 107 */
+	{ 8UL, b32+177, 0,       P_BE   | P_ACADEM, 0,       b32+152, 0,       aliases+149},	/* 107 */
 	{13UL, b32+187, 0,       P_BE   | P_ATTEST, 0,       b32+ 45, 0,       aliases+ 16},	/* 108 */
 	{12UL, b32+194, b32+209, P_BE   | P_ACADEM, 0,       b32+176, 0,       aliases+ 12},	/* 109 */
-	{32UL, b32+196, b32+215, P_LE   | P_ATTEST, b32+215, b32+ 23, b32+117, aliases+ 94},	/* 110 */
+	{32UL, b32+196, b32+215, P_LE   | P_ATTEST, b32+215, b32+ 23, b32+117, aliases+ 95},	/* 110 */
 	{10UL, b32+198, b32+208, P_BE   | P_ACADEM, 0,       b32+116, 0,       aliases+  5},	/* 111 */
 	{ 0UL, 0,       0,       P_BE   | P_UNDFCL, 0,       0,       0,       NULL       },	/* terminating entry */
 };
@@ -668,166 +669,167 @@ static const struct malias aliases[] = {
 	{"CRC-16/ARC",			models+ 74},	/*  24 */
 	{"CRC-16/AUG-CCITT",		models+ 21},	/*  25 */
 	{"CRC-16/AUTOSAR",		models+ 25},	/*  26 */
-	{"CRC-16/BUYPASS",		models+ 73},	/*  27 */
-	{"CRC-16/CCITT",		models+ 20},	/*  28 */
-	{"CRC-16/CCITT-FALSE",		models+ 25},	/*  29 */
-	{"CRC-16/CCITT-TRUE",		models+ 20},	/*  30 */
-	{"CRC-16/CDMA2000",		models+104},	/*  31 */
-	{"CRC-16/CMS",			models+ 77},	/*  32 */
-	{"CRC-16/DARC",			models+ 26},	/*  33 */
-	{"CRC-16/DDS-110",		models+ 76},	/*  34 */
-	{"CRC-16/DECT-R",		models+ 10},	/*  35 */
-	{"CRC-16/DECT-X",		models+  9},	/*  36 */
-	{"CRC-16/DNP",			models+ 51},	/*  37 */
-	{"CRC-16/EN-13757",		models+ 50},	/*  38 */
-	{"CRC-16/EPC",			models+ 26},	/*  39 */
-	{"CRC-16/EPC-C1G2",		models+ 26},	/*  40 */
-	{"CRC-16/GENIBUS",		models+ 26},	/*  41 */
-	{"CRC-16/GSM",			models+ 19},	/*  42 */
-	{"CRC-16/I-CODE",		models+ 26},	/*  43 */
-	{"CRC-16/IBM-3740",		models+ 25},	/*  44 */
-	{"CRC-16/IBM-SDLC",		models+ 28},	/*  45 */
-	{"CRC-16/IEC-61158-2",		models+ 37},	/*  46 */
-	{"CRC-16/ISO-HDLC",		models+ 28},	/*  47 */
-	{"CRC-16/ISO-IEC-14443-3-A",	models+ 24},	/*  48 */
-	{"CRC-16/ISO-IEC-14443-3-B",	models+ 28},	/*  49 */
-	{"CRC-16/KERMIT",		models+ 20},	/*  50 */
-	{"CRC-16/LHA",			models+ 74},	/*  51 */
-	{"CRC-16/LJ1200",		models+ 66},	/*  52 */
-	{"CRC-16/LTE",			models+ 18},	/*  53 */
-	{"CRC-16/M17",			models+ 58},	/*  54 */
-	{"CRC-16/MAXIM",		models+ 75},	/*  55 */
-	{"CRC-16/MAXIM-DOW",		models+ 75},	/*  56 */
-	{"CRC-16/MCRF4XX",		models+ 27},	/*  57 */
-	{"CRC-16/MODBUS",		models+ 78},	/*  58 */
-	{"CRC-16/NRSC-5",		models+ 14},	/*  59 */
-	{"CRC-16/OPENSAFETY-A",		models+ 57},	/*  60 */
-	{"CRC-16/OPENSAFETY-B",		models+ 69},	/*  61 */
-	{"CRC-16/PROFIBUS",		models+ 37},	/*  62 */
-	{"CRC-16/RIELLO",		models+ 23},	/*  63 */
-	{"CRC-16/SPI-FUJITSU",		models+ 21},	/*  64 */
-	{"CRC-16/T10-DIF",		models+ 90},	/*  65 */
-	{"CRC-16/TELEDISK",		models+ 97},	/*  66 */
-	{"CRC-16/TMS37157",		models+ 22},	/*  67 */
-	{"CRC-16/UMTS",			models+ 73},	/*  68 */
-	{"CRC-16/USB",			models+ 79},	/*  69 */
-	{"CRC-16/V-41-LSB",		models+ 20},	/*  70 */
-	{"CRC-16/V-41-MSB",		models+ 18},	/*  71 */
-	{"CRC-16/VERIFONE",		models+ 73},	/*  72 */
-	{"CRC-16/X-25",			models+ 28},	/*  73 */
-	{"CRC-16/XMODEM",		models+ 18},	/*  74 */
-	{"CRC-17/CAN-FD",		models+102},	/*  75 */
-	{"CRC-21/CAN-FD",		models+ 85},	/*  76 */
-	{"CRC-24",			models+ 87},	/*  77 */
-	{"CRC-24/BLE",			models+  3},	/*  78 */
-	{"CRC-24/FLEXRAY-A",		models+ 61},	/*  79 */
-	{"CRC-24/FLEXRAY-B",		models+ 60},	/*  80 */
-	{"CRC-24/INTERLAKEN",		models+ 48},	/*  81 */
-	{"CRC-24/LTE-A",		models+ 86},	/*  82 */
-	{"CRC-24/LTE-B",		models+ 70},	/*  83 */
-	{"CRC-24/OPENPGP",		models+ 87},	/*  84 */
-	{"CRC-24/OS-9",			models+ 71},	/*  85 */
-	{"CRC-3/GSM",			models+ 62},	/*  86 */
-	{"CRC-3/ROHC",			models+ 63},	/*  87 */
-	{"CRC-30/CDMA",			models+ 81},	/*  88 */
-	{"CRC-31/PHILIPS",		models+ 15},	/*  89 */
-	{"CRC-32",			models+  8},	/*  90 */
-	{"CRC-32/AAL5",			models+  6},	/*  91 */
-	{"CRC-32/ADCCP",		models+  8},	/*  92 */
-	{"CRC-32/AIXM",			models+ 84},	/*  93 */
-	{"CRC-32/AUTOSAR",		models+110},	/*  94 */
-	{"CRC-32/BASE91-C",		models+ 38},	/*  95 */
-	{"CRC-32/BASE91-D",		models+100},	/*  96 */
-	{"CRC-32/BZIP2",		models+  6},	/*  97 */
-	{"CRC-32/CASTAGNOLI",		models+ 38},	/*  98 */
-	{"CRC-32/CD-ROM-EDC",		models+ 72},	/*  99 */
-	{"CRC-32/CKSUM",		models+  4},	/* 100 */
-	{"CRC-32/DECT-B",		models+  6},	/* 101 */
-	{"CRC-32/INTERLAKEN",		models+ 38},	/* 102 */
-	{"CRC-32/ISCSI",		models+ 38},	/* 103 */
-	{"CRC-32/ISO-HDLC",		models+  8},	/* 104 */
-	{"CRC-32/JAMCRC",		models+  7},	/* 105 */
-	{"CRC-32/MEF",			models+ 68},	/* 106 */
-	{"CRC-32/MPEG-2",		models+  5},	/* 107 */
-	{"CRC-32/POSIX",		models+  4},	/* 108 */
-	{"CRC-32/V-42",			models+  8},	/* 109 */
-	{"CRC-32/XFER",			models+  1},	/* 110 */
-	{"CRC-32/XZ",			models+  8},	/* 111 */
-	{"CRC-32C",			models+ 38},	/* 112 */
-	{"CRC-32D",			models+100},	/* 113 */
-	{"CRC-32Q",			models+ 84},	/* 114 */
-	{"CRC-4/G-704",			models+ 44},	/* 115 */
-	{"CRC-4/INTERLAKEN",		models+ 45},	/* 116 */
-	{"CRC-4/ITU",			models+ 44},	/* 117 */
-	{"CRC-40/GSM",			models+  2},	/* 118 */
-	{"CRC-5/EPC",			models+ 55},	/* 119 */
-	{"CRC-5/EPC-C1G2",		models+ 55},	/* 120 */
-	{"CRC-5/G-704",			models+ 99},	/* 121 */
-	{"CRC-5/ITU",			models+ 99},	/* 122 */
-	{"CRC-5/USB",			models+ 41},	/* 123 */
-	{"CRC-6/CDMA2000-A",		models+ 95},	/* 124 */
-	{"CRC-6/CDMA2000-B",		models+ 30},	/* 125 */
-	{"CRC-6/DARC",			models+ 65},	/* 126 */
-	{"CRC-6/G-704",			models+ 16},	/* 127 */
-	{"CRC-6/GSM",			models+103},	/* 128 */
-	{"CRC-6/ITU",			models+ 16},	/* 129 */
-	{"CRC-64",			models+ 52},	/* 130 */
-	{"CRC-64/ECMA-182",		models+ 52},	/* 131 */
-	{"CRC-64/GO-ECMA",		models+ 54},	/* 132 */
-	{"CRC-64/GO-ISO",		models+  0},	/* 133 */
-	{"CRC-64/MS",			models+ 40},	/* 134 */
-	{"CRC-64/REDIS",		models+101},	/* 135 */
-	{"CRC-64/WE",			models+ 53},	/* 136 */
-	{"CRC-64/XZ",			models+ 54},	/* 137 */
-	{"CRC-7",			models+ 29},	/* 138 */
-	{"CRC-7/MMC",			models+ 29},	/* 139 */
-	{"CRC-7/ROHC",			models+ 96},	/* 140 */
-	{"CRC-7/UMTS",			models+ 88},	/* 141 */
-	{"CRC-8",			models+ 11},	/* 142 */
-	{"CRC-8/AES",			models+ 36},	/* 143 */
-	{"CRC-8/AUTOSAR",		models+ 43},	/* 144 */
-	{"CRC-8/BLUETOOTH",		models+ 98},	/* 145 */
-	{"CRC-8/CDMA2000",		models+ 94},	/* 146 */
-	{"CRC-8/DARC",			models+ 49},	/* 147 */
-	{"CRC-8/DVB-S2",		models+107},	/* 148 */
-	{"CRC-8/EBU",			models+ 36},	/* 149 */
-	{"CRC-8/GSM-A",			models+ 31},	/* 150 */
-	{"CRC-8/GSM-B",			models+ 56},	/* 151 */
-	{"CRC-8/HITAG",			models+ 34},	/* 152 */
-	{"CRC-8/I-432-1",		models+ 12},	/* 153 */
-	{"CRC-8/I-CODE",		models+ 33},	/* 154 */
-	{"CRC-8/ITU",			models+ 12},	/* 155 */
-	{"CRC-8/LTE",			models+ 92},	/* 156 */
-	{"CRC-8/MAXIM",			models+ 46},	/* 157 */
-	{"CRC-8/MAXIM-DOW",		models+ 46},	/* 158 */
-	{"CRC-8/MIFARE-MAD",		models+ 32},	/* 159 */
-	{"CRC-8/NRSC-5",		models+ 47},	/* 160 */
-	{"CRC-8/OPENSAFETY",		models+ 42},	/* 161 */
-	{"CRC-8/ROHC",			models+ 13},	/* 162 */
-	{"CRC-8/SAE-J1850",		models+ 35},	/* 163 */
-	{"CRC-8/SMBUS",			models+ 11},	/* 164 */
-	{"CRC-8/TECH-3250",		models+ 36},	/* 165 */
-	{"CRC-8/WCDMA",			models+ 93},	/* 166 */
-	{"CRC-82/DARC",			models+ 17},	/* 167 */
-	{"CRC-A",			models+ 24},	/* 168 */
-	{"CRC-B",			models+ 28},	/* 169 */
-	{"CRC-CCITT",			models+ 20},	/* 170 */
-	{"CRC-IBM",			models+ 74},	/* 171 */
-	{"DOW-CRC",			models+ 46},	/* 172 */
-	{"JAMCRC",			models+  7},	/* 173 */
-	{"KERMIT",			models+ 20},	/* 174 */
-	{"MODBUS",			models+ 78},	/* 175 */
-	{"PKZIP",			models+  8},	/* 176 */
-	{"R-CRC-16",			models+ 10},	/* 177 */
-	{"X-25",			models+ 28},	/* 178 */
-	{"X-CRC-12",			models+ 82},	/* 179 */
-	{"X-CRC-16",			models+  9},	/* 180 */
-	{"XFER",			models+  1},	/* 181 */
-	{"XMODEM",			models+ 18},	/* 182 */
-	{"ZMODEM",			models+ 18},	/* 183 */
+	{"CRC-16/BLUETOOTH",		models+ 20},	/*  27 */
+	{"CRC-16/BUYPASS",		models+ 73},	/*  28 */
+	{"CRC-16/CCITT",		models+ 20},	/*  29 */
+	{"CRC-16/CCITT-FALSE",		models+ 25},	/*  30 */
+	{"CRC-16/CCITT-TRUE",		models+ 20},	/*  31 */
+	{"CRC-16/CDMA2000",		models+104},	/*  32 */
+	{"CRC-16/CMS",			models+ 77},	/*  33 */
+	{"CRC-16/DARC",			models+ 26},	/*  34 */
+	{"CRC-16/DDS-110",		models+ 76},	/*  35 */
+	{"CRC-16/DECT-R",		models+ 10},	/*  36 */
+	{"CRC-16/DECT-X",		models+  9},	/*  37 */
+	{"CRC-16/DNP",			models+ 51},	/*  38 */
+	{"CRC-16/EN-13757",		models+ 50},	/*  39 */
+	{"CRC-16/EPC",			models+ 26},	/*  40 */
+	{"CRC-16/EPC-C1G2",		models+ 26},	/*  41 */
+	{"CRC-16/GENIBUS",		models+ 26},	/*  42 */
+	{"CRC-16/GSM",			models+ 19},	/*  43 */
+	{"CRC-16/I-CODE",		models+ 26},	/*  44 */
+	{"CRC-16/IBM-3740",		models+ 25},	/*  45 */
+	{"CRC-16/IBM-SDLC",		models+ 28},	/*  46 */
+	{"CRC-16/IEC-61158-2",		models+ 37},	/*  47 */
+	{"CRC-16/ISO-HDLC",		models+ 28},	/*  48 */
+	{"CRC-16/ISO-IEC-14443-3-A",	models+ 24},	/*  49 */
+	{"CRC-16/ISO-IEC-14443-3-B",	models+ 28},	/*  50 */
+	{"CRC-16/KERMIT",		models+ 20},	/*  51 */
+	{"CRC-16/LHA",			models+ 74},	/*  52 */
+	{"CRC-16/LJ1200",		models+ 66},	/*  53 */
+	{"CRC-16/LTE",			models+ 18},	/*  54 */
+	{"CRC-16/M17",			models+ 58},	/*  55 */
+	{"CRC-16/MAXIM",		models+ 75},	/*  56 */
+	{"CRC-16/MAXIM-DOW",		models+ 75},	/*  57 */
+	{"CRC-16/MCRF4XX",		models+ 27},	/*  58 */
+	{"CRC-16/MODBUS",		models+ 78},	/*  59 */
+	{"CRC-16/NRSC-5",		models+ 14},	/*  60 */
+	{"CRC-16/OPENSAFETY-A",		models+ 57},	/*  61 */
+	{"CRC-16/OPENSAFETY-B",		models+ 69},	/*  62 */
+	{"CRC-16/PROFIBUS",		models+ 37},	/*  63 */
+	{"CRC-16/RIELLO",		models+ 23},	/*  64 */
+	{"CRC-16/SPI-FUJITSU",		models+ 21},	/*  65 */
+	{"CRC-16/T10-DIF",		models+ 90},	/*  66 */
+	{"CRC-16/TELEDISK",		models+ 97},	/*  67 */
+	{"CRC-16/TMS37157",		models+ 22},	/*  68 */
+	{"CRC-16/UMTS",			models+ 73},	/*  69 */
+	{"CRC-16/USB",			models+ 79},	/*  70 */
+	{"CRC-16/V-41-LSB",		models+ 20},	/*  71 */
+	{"CRC-16/V-41-MSB",		models+ 18},	/*  72 */
+	{"CRC-16/VERIFONE",		models+ 73},	/*  73 */
+	{"CRC-16/X-25",			models+ 28},	/*  74 */
+	{"CRC-16/XMODEM",		models+ 18},	/*  75 */
+	{"CRC-17/CAN-FD",		models+102},	/*  76 */
+	{"CRC-21/CAN-FD",		models+ 85},	/*  77 */
+	{"CRC-24",			models+ 87},	/*  78 */
+	{"CRC-24/BLE",			models+  3},	/*  79 */
+	{"CRC-24/FLEXRAY-A",		models+ 61},	/*  80 */
+	{"CRC-24/FLEXRAY-B",		models+ 60},	/*  81 */
+	{"CRC-24/INTERLAKEN",		models+ 48},	/*  82 */
+	{"CRC-24/LTE-A",		models+ 86},	/*  83 */
+	{"CRC-24/LTE-B",		models+ 70},	/*  84 */
+	{"CRC-24/OPENPGP",		models+ 87},	/*  85 */
+	{"CRC-24/OS-9",			models+ 71},	/*  86 */
+	{"CRC-3/GSM",			models+ 62},	/*  87 */
+	{"CRC-3/ROHC",			models+ 63},	/*  88 */
+	{"CRC-30/CDMA",			models+ 81},	/*  89 */
+	{"CRC-31/PHILIPS",		models+ 15},	/*  90 */
+	{"CRC-32",			models+  8},	/*  91 */
+	{"CRC-32/AAL5",			models+  6},	/*  92 */
+	{"CRC-32/ADCCP",		models+  8},	/*  93 */
+	{"CRC-32/AIXM",			models+ 84},	/*  94 */
+	{"CRC-32/AUTOSAR",		models+110},	/*  95 */
+	{"CRC-32/BASE91-C",		models+ 38},	/*  96 */
+	{"CRC-32/BASE91-D",		models+100},	/*  97 */
+	{"CRC-32/BZIP2",		models+  6},	/*  98 */
+	{"CRC-32/CASTAGNOLI",		models+ 38},	/*  99 */
+	{"CRC-32/CD-ROM-EDC",		models+ 72},	/* 100 */
+	{"CRC-32/CKSUM",		models+  4},	/* 101 */
+	{"CRC-32/DECT-B",		models+  6},	/* 102 */
+	{"CRC-32/INTERLAKEN",		models+ 38},	/* 103 */
+	{"CRC-32/ISCSI",		models+ 38},	/* 104 */
+	{"CRC-32/ISO-HDLC",		models+  8},	/* 105 */
+	{"CRC-32/JAMCRC",		models+  7},	/* 106 */
+	{"CRC-32/MEF",			models+ 68},	/* 107 */
+	{"CRC-32/MPEG-2",		models+  5},	/* 108 */
+	{"CRC-32/POSIX",		models+  4},	/* 109 */
+	{"CRC-32/V-42",			models+  8},	/* 110 */
+	{"CRC-32/XFER",			models+  1},	/* 111 */
+	{"CRC-32/XZ",			models+  8},	/* 112 */
+	{"CRC-32C",			models+ 38},	/* 113 */
+	{"CRC-32D",			models+100},	/* 114 */
+	{"CRC-32Q",			models+ 84},	/* 115 */
+	{"CRC-4/G-704",			models+ 44},	/* 116 */
+	{"CRC-4/INTERLAKEN",		models+ 45},	/* 117 */
+	{"CRC-4/ITU",			models+ 44},	/* 118 */
+	{"CRC-40/GSM",			models+  2},	/* 119 */
+	{"CRC-5/EPC",			models+ 55},	/* 120 */
+	{"CRC-5/EPC-C1G2",		models+ 55},	/* 121 */
+	{"CRC-5/G-704",			models+ 99},	/* 122 */
+	{"CRC-5/ITU",			models+ 99},	/* 123 */
+	{"CRC-5/USB",			models+ 41},	/* 124 */
+	{"CRC-6/CDMA2000-A",		models+ 95},	/* 125 */
+	{"CRC-6/CDMA2000-B",		models+ 30},	/* 126 */
+	{"CRC-6/DARC",			models+ 65},	/* 127 */
+	{"CRC-6/G-704",			models+ 16},	/* 128 */
+	{"CRC-6/GSM",			models+103},	/* 129 */
+	{"CRC-6/ITU",			models+ 16},	/* 130 */
+	{"CRC-64",			models+ 52},	/* 131 */
+	{"CRC-64/ECMA-182",		models+ 52},	/* 132 */
+	{"CRC-64/GO-ECMA",		models+ 54},	/* 133 */
+	{"CRC-64/GO-ISO",		models+  0},	/* 134 */
+	{"CRC-64/MS",			models+ 40},	/* 135 */
+	{"CRC-64/REDIS",		models+101},	/* 136 */
+	{"CRC-64/WE",			models+ 53},	/* 137 */
+	{"CRC-64/XZ",			models+ 54},	/* 138 */
+	{"CRC-7",			models+ 29},	/* 139 */
+	{"CRC-7/MMC",			models+ 29},	/* 140 */
+	{"CRC-7/ROHC",			models+ 96},	/* 141 */
+	{"CRC-7/UMTS",			models+ 88},	/* 142 */
+	{"CRC-8",			models+ 11},	/* 143 */
+	{"CRC-8/AES",			models+ 36},	/* 144 */
+	{"CRC-8/AUTOSAR",		models+ 43},	/* 145 */
+	{"CRC-8/BLUETOOTH",		models+ 98},	/* 146 */
+	{"CRC-8/CDMA2000",		models+ 94},	/* 147 */
+	{"CRC-8/DARC",			models+ 49},	/* 148 */
+	{"CRC-8/DVB-S2",		models+107},	/* 149 */
+	{"CRC-8/EBU",			models+ 36},	/* 150 */
+	{"CRC-8/GSM-A",			models+ 31},	/* 151 */
+	{"CRC-8/GSM-B",			models+ 56},	/* 152 */
+	{"CRC-8/HITAG",			models+ 34},	/* 153 */
+	{"CRC-8/I-432-1",		models+ 12},	/* 154 */
+	{"CRC-8/I-CODE",		models+ 33},	/* 155 */
+	{"CRC-8/ITU",			models+ 12},	/* 156 */
+	{"CRC-8/LTE",			models+ 92},	/* 157 */
+	{"CRC-8/MAXIM",			models+ 46},	/* 158 */
+	{"CRC-8/MAXIM-DOW",		models+ 46},	/* 159 */
+	{"CRC-8/MIFARE-MAD",		models+ 32},	/* 160 */
+	{"CRC-8/NRSC-5",		models+ 47},	/* 161 */
+	{"CRC-8/OPENSAFETY",		models+ 42},	/* 162 */
+	{"CRC-8/ROHC",			models+ 13},	/* 163 */
+	{"CRC-8/SAE-J1850",		models+ 35},	/* 164 */
+	{"CRC-8/SMBUS",			models+ 11},	/* 165 */
+	{"CRC-8/TECH-3250",		models+ 36},	/* 166 */
+	{"CRC-8/WCDMA",			models+ 93},	/* 167 */
+	{"CRC-82/DARC",			models+ 17},	/* 168 */
+	{"CRC-A",			models+ 24},	/* 169 */
+	{"CRC-B",			models+ 28},	/* 170 */
+	{"CRC-CCITT",			models+ 20},	/* 171 */
+	{"CRC-IBM",			models+ 74},	/* 172 */
+	{"DOW-CRC",			models+ 46},	/* 173 */
+	{"JAMCRC",			models+  7},	/* 174 */
+	{"KERMIT",			models+ 20},	/* 175 */
+	{"MODBUS",			models+ 78},	/* 176 */
+	{"PKZIP",			models+  8},	/* 177 */
+	{"R-CRC-16",			models+ 10},	/* 178 */
+	{"X-25",			models+ 28},	/* 179 */
+	{"X-CRC-12",			models+ 82},	/* 180 */
+	{"X-CRC-16",			models+  9},	/* 181 */
+	{"XFER",			models+  1},	/* 182 */
+	{"XMODEM",			models+ 18},	/* 183 */
+	{"ZMODEM",			models+ 18},	/* 184 */
 	{NULL,				NULL      },	/* terminating entry */
 };
-#    define NALIASES 184
+#    define NALIASES 185
 
 #  endif /* BMP_BIT */
 #else /* PRESETS */

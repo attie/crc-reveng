@@ -19,6 +19,9 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+3.0.5	27 August 2022
+	* Added alias CRC-16/BLUETOOTH from the CRC Catalogue.
+
 3.0.4	24 August 2022
 	* Added algorithm CRC-64/REDIS from the CRC Catalogue (thanks
 	  to Johann N. Loefflmann).
