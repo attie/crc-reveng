@@ -1,5 +1,5 @@
 /* reveng.c
- * Greg Cook, 4/Jan/2022
+ * Greg Cook, 12/Jan/2022
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -250,9 +250,9 @@ modpol(const poly_t init, int rflags, int args, const poly_t *argpolys) {
 				pnorm(&work);
 			if(plen(work)) {
 				/* combine work with running gcd */
-				if((nogcd >>= 1))
+				if((nogcd >>= 1)) /* true first time only */
 					pcpy(&gcd, work);
-				else while(plen(work)) {
+				else do {
 					/* ptst(gcd) != 0 */
 
 					/* optimisation which also accounts
@@ -274,7 +274,7 @@ modpol(const poly_t init, int rflags, int args, const poly_t *argpolys) {
 					gcd = work;
 					work = rem;
 					pnorm(&work);
-				}
+				} while(plen(work));
 			}
 			pfree(&work);
 		}

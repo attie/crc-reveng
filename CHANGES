@@ -19,6 +19,14 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+3.0.2	12 January 2022
+	* Reading a file which exceeds the size limit of polynomials
+	  causes an error.
+
+3.0.1	11 January 2022
+	* Added algorithms CRC-32/MEF and CRC-64/MS from the CRC
+	  catalogue (thanks to Greg Nelson, Grammatech Inc.)
+
 3.0.0	4 January 2022
 	* Reduces or eliminates brute force search for POLY in many
 	  cases by finding the greatest common divisor of differences

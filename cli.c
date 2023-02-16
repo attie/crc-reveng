@@ -1,5 +1,5 @@
 /* cli.c
- * Greg Cook, 2/Jan/2022
+ * Greg Cook, 12/Jan/2022
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -570,21 +570,27 @@ rdpoly(const char *name, int flags, int bperhx) {
 	input = oread(name);
 	while(!feof(input) && !ferror(input)) {
 		chunk = filtop(input, BUFFER, flags, bperhx);
-		total += plen(chunk);
-		if((b = total) > plen(apoly)) {
+		if((total += plen(chunk)) < plen(chunk)) {
+			fprintf(stderr, "%s: %s: file too long", myname, name);
+			exit(EXIT_FAILURE);
+		}
+		if(total > plen(apoly)) {
 			/* Grow apoly geometrically */
 			/* Find a = power of two not greater than total */
-			/* b = total > 0 */
+			/* 0 < b <= total */
+			b = total & ~(total >> 1);
 			do {
 				a = b;
-				b &= (b - 1UL);
-			} while(b);
+			} while(b &= (b - 1UL));
 			/* 0 < a <= total */
 			/* Add quanta to a until it equals or exceeds total */
 			if(!(b = a >> GSCALE))
 				a = total;
-			else while(a < total)
+			else while(a && a < total)
 				a += b;
+			/* a == 0 on overflow */
+			if(!a)
+				a = ~0UL;
 			/* Allocate a bits to apoly */
 			praloc(&apoly, a);
 		}

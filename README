@@ -47,7 +47,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 108 currently listed models available as presets.
+algorithms", with the 110 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -566,7 +566,9 @@ CRC algorithm is wide, try for instance to obtain a pair of codewords
 where the message portion differs only in the last byte or two.  Even if
 the difference at the end of the message portion is as long as the
 checksum itself, the number of trial divisions needed is still cut in
-half.
+half.  CRC RevEng takes the greatest common divisor of all differences
+between arguments, which is no longer than the shortest difference, and
+may reduce the search space further.
 
 To find the Poly value when Init is not known, at least two of the given
 arguments must have the same length.
@@ -591,8 +593,8 @@ has one or more equivalent forms.  Equivalent forms differ in Init,
 XorOut and Residue values, but they produce identical CRCs at all
 message lengths.  Therefore unless -1, -i INIT or -x XOROUT are
 specified, any such algorithm and its equivalent forms are always
-returned together, no matter how many codewords are given.  (If (x + 1)
-appears n times in the factorisation of G(x), then there shall be
+returned together, no matter how many codewords are given.  (If
+(x + 1)^n appears in the factorisation of G(x), then there shall be
 2^n - 1 equivalent forms.)
 
 
@@ -749,7 +751,7 @@ Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (24 December 2021).  "Catalogue of parametrised CRC
+Cook, Greg (11 January 2022).  "Catalogue of parametrised CRC
 algorithms".
   <https://reveng.sourceforge.io/crc-catalogue/>
 

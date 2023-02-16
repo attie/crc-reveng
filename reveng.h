@@ -1,5 +1,5 @@
 /* reveng.h
- * Greg Cook, 4/Jan/2022
+ * Greg Cook, 12/Jan/2022
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -93,7 +93,7 @@
 /* Global definitions */
 
 /* CRC RevEng version string */
-#define VERSION "3.0.0"
+#define VERSION "3.0.2"
 
 /* bmpbit.c */
 typedef BMP_T bmp_t;
