@@ -34,19 +34,21 @@ modified copy of ASPEX as a whole by extracting files getopt.c and
 getopt.h verbatim on 19 December 2010.  These are found in the contrib/
 directory.  A compatible getopt module is available as standard in many
 environments and will work just as well, but this copy is included for
-those ANSI C environments that do not possess one.
+those ANSI C environments that lack one.
 
-A copy of the RISC OS Shared C Library (CLib), along with a patch to
-make certain versions of RISC OS compatible with this version of CLib,
-is supplied with the RISC OS binary under licence from Castle Technology
+A copy of the RISC OS Shared C Library (CLib), and a patch to make
+certain versions of RISC OS compatible with this version of CLib, are
+supplied with the RISC OS binary under licence from Castle Technology
 Limited for distribution to end users for the purpose of upgrading, if
-required.  These are found in the bin/riscos/ directory.  CLib qualifies
-as a "System Library" and GPLv3 permits licensees to "combine GPLed
-software with GPL-incompatible System Libraries, [...] and distribute
-them both together."  See Sections 1, 5 and 6 and A Quick Guide to
-GPLv3, <http://www.gnu.org/licenses/quick-guide-gplv3.html> The patch
-is an independent program and is not bound by GPLv3 by mere inclusion.
-See Section 5.
+required.  These are found in the bin/riscos/ directory.  The ARM Tube
+OS binary, located in the bin/armtubeos/ directory, is statically linked
+with (that is, incorporates) the RISC OS Shared C Library.
+CLib qualifies as a "System Library" and GPLv3 permits licensees to
+"combine GPLed software with GPL-incompatible System Libraries, [...]
+and distribute them both together."  See Sections 1, 5 and 6 and A Quick
+Guide to GPLv3, <http://www.gnu.org/licenses/quick-guide-gplv3.html>
+The patch is an independent program and is not bound by GPLv3 by mere
+inclusion.  See Section 5.
 
 CRC REVENG
 
@@ -161,18 +163,16 @@ The options and switches for specifying a model are:
 	-B
 		Big-endian output (RefOut = False).  Implies -r.
 	-i INIT
-		A hexadecimal digit string (without the leading 0x)
-		specifying the initial value to set in the shift
-		register before computing the CRC.
+		A hexadecimal digit string specifying the initial value
+		to set in the shift register before computing the CRC.
 		The width must be specified with -k, -m or -w before -i.
 	-k KPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed-reciprocal notation found in
 		Philip Koopman's papers.  The highest-order term is
-		included and the lowest-order term is omitted (as is the
-		leading 0x), shifting the other terms to the right.
-		Thus 0x18005 is specified as C002.  This automatically
-		provides the Width value.
+		included and the lowest-order term is omitted, shifting
+		the other terms to the right.  Thus 0x18005 is specified
+		as C002.  This automatically provides the Width value.
 	-l
 		Little-endian input and output (RefIn = True, RefOut =
 		True).  Implies -L and -t.
@@ -195,16 +195,15 @@ The options and switches for specifying a model are:
 		sets the feedback tap positions of the shift register.
 		POLY is written in the hexadecimal, direct notation
 		found in MSB-first code.  The highest-order term is
-		omitted (as is the leading 0x), thus 0x18005 is
-		specified as 8005.
+		omitted, thus 0x18005 is specified as 8005.
 		-p also sets the start of the range for polynomial range
 		searching, see -q.
 		The width must be specified with -k, -m or -w before -p.
 	-P RPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed notation found in LSB-first code.
-		The highest-order term is omitted (as is the leading 0x)
-		before reversal, thus 0x18005 is specified as A001.
+		The highest-order term is omitted before reversal, thus
+		0x18005 is specified as A001.
 		The width must be specified with -k, -m or -w before -P.
 	-V
 		Reverse the current model.  If RefOut = True, the Init
@@ -217,9 +216,8 @@ The options and switches for specifying a model are:
 		The width, that is, the number of bits in the shift
 		register.
 	-x XOROUT
-		A hexadecimal digit string (without the leading 0x)
-		specifying the value to be added to the final shift
-		register value before output.
+		A hexadecimal digit string specifying the value to be
+		added to the final shift register value before output.
 		The width must be specified with -k, -m or -w before -x.
 
 Other model-related options:
@@ -237,11 +235,11 @@ Other model-related options:
 
 INPUT AND OUTPUT
 
-Messages for CRC RevEng to process can be specified as files or as
-numerical (typically hexadecimal) string arguments on the command line.
-Output from CRC RevEng is either as Williams model records (having their
-own fixed format) or as numerical string arguments printed one per line
-on standard output.
+Messages for CRC RevEng to process can be specified as files, as raw
+binary strings, or as numerical (typically hexadecimal) string arguments
+on the command line.  Output from CRC RevEng is either as Williams model
+records (having their own fixed format) or as numerical string arguments
+printed one per line on standard output.
 
 When passing numerical arguments on the command line, each argument is
 conceptually divided into characters, each character consisting of one
@@ -252,11 +250,11 @@ appended to the binary representation of the argument; any excess bits
 are discarded.  The -a option (q.v.) permits a number of useful
 representations of a given underlying binary sequence.
 
-When passing messages as files, the same division into characters
-applies; bytes of the file are read until enough bits have been
-collected, then a specified number of bits are taken from the least
-significant end, reflected (if RefIn = True) and added to the binary
-representation.
+When passing messages as files or as raw binary strings, the same
+division into characters applies; bytes of the message are read until
+enough bits have been collected, then a specified number of bits are
+taken from the specified least significant end of the collection (see
+-y), reflected (if RefIn = True) and added to the binary representation.
 
 When printing output, the binary representation is again divided into
 characters, each of which is reversed (if RefOut = True) and printed
@@ -269,25 +267,28 @@ and output:
 
 	-a BITS
 		Specifies the number of bits per character in input and
-		output.  Implies -A BITS.  Particular values of BITS
-		cause the input to be interpreted as a sequence of:
-		-a 16   16-bit words, raw (in files) or as quartets of
-			hex digits.  When RefIn or RefOut are True, this
-			is equivalent to swapping the bytes of each pair
+		output.  Implies -A BITS.  Raw input messages are
+		selected by -f or -z, otherwise messages are numerical
+		arguments.  Particular values of BITS cause the input to
+		be interpreted as a sequence of:
+		-a 16   16-bit words, raw or as quartets of hex digits.
+			When RefIn or RefOut are True, this is
+			equivalent to swapping the bytes of each pair
 			before input to an 8-bit calculator.
-		-a  8	8-bit characters, raw (in files) or as pairs of
-			hex digits (in arguments).  This is the default.
-		-a  7	7-bit characters, one per 8-bit byte (in files)
-			or as pairs of hex digits (in arguments).
-		-a  4	Single hex digits (not in files).
+		-a  8	8-bit characters, raw or as pairs of hex digits.
+			This is the default.
+		-a  7	7-bit characters, one per 8-bit byte (raw) or as
+			pairs of hex digits.
+		-a  4	Single hex digits (numerical arguments only).
 		-a  3	Single octal digits 0-7.
 		-a  1	Single binary digits 0-1.
-		Note that text files containing digits will only be read
-		as expected if there is no trailing newline or other
-		whitespace, and if the digits are maskable in the system
-		character encoding (as digits 0-9 are in ASCII, EBCDIC
-		and Unicode.)  This is because the lowest bits of each
-		byte are extracted as described above.
+		Note that raw messages (files or arguments) containing
+		digits will only be read as expected if there is no
+		final newline or other whitespace, and if the digits are
+		maskable in the system character encoding (as digits 0-9
+		are in ASCII, EBCDIC and Unicode.)  This is because the
+		lowest bits of each byte are extracted as described
+		above.
 	-A OBITS
 		Specifies the number of bits per character in output.
 	-f
@@ -339,7 +340,7 @@ input messages.
 If -V and -v are given together, their respective model reversals cancel
 out.  CRC RevEng then calculates an ordinary CRC for each argument,
 processing the characters from right to left and likewise emitting the
-CRC characters in reverse.
+CRC characters in reverse order.
 Correspondingly, to obtain the same effect as -v using a model reversed
 by -V, the user must present the characters of his or her message, and
 process those of the returned CRC, in reverse order.
@@ -453,8 +454,8 @@ do not participate in the CRC.
 
 As non-standard algorithms are comparatively rare, the program first
 tries all the preset models of the given width, reporting and exiting if
-one is found.  Otherwise it will commence a full search.  As it proceeds
-it prints a progress message from time to time, allowing the search to
+one is found.  Otherwise it commences a full search.  As it proceeds it
+prints a progress message from time to time, allowing the search to
 be restarted from that point:
 
 	reveng: searching: width=32  poly=0x50000001  refin=false
@@ -525,9 +526,9 @@ The full list of search options is as follows:
 	-p POLY
 		When followed by -q QPOLY, sets the start of the range
 		(inclusive) for polynomial range searching.  POLY is
-		written in hexadecimal direct notation (without the
-		leading 0x).  The LSB is forced to 1 as only 'odd'
-		polynomials, with a +1 term, are tested.
+		written in hexadecimal direct notation.  The LSB is
+		forced to 1 as only 'odd' polynomials, with a +1 term,
+		are tested.
 	-q QPOLY
 		Enables polynomial range searching and sets the end of
 		the range (exclusive).  A previous -p POLY is no longer
@@ -535,10 +536,10 @@ The full list of search options is as follows:
 		the start of the range; if there is no previous -p POLY,
 		the start of the range defaults to the lowest odd
 		polynomial.
-		QPOLY is written in hexadecimal direct notation (without
-		the leading 0x).  If QPOLY is zero, the range extends up
-		to (and including) the highest odd polynomial.  Unlike
-		-p POLY, the LSB is significant.
+		QPOLY is written in hexadecimal direct notation.  If
+		QPOLY is zero, the range extends up to (and including)
+		the highest odd polynomial.  Unlike -p POLY, the LSB is
+		significant.
 	-s
 		Search for and display Williams model records of CRC
 		models matching the arguments and given parameters.

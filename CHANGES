@@ -18,6 +18,11 @@ along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+1.3.1	31 July 2015
+	* Numerical (not raw) arguments and option parameters accept and
+	  discard hexadecimal prefixes 0x, $ and &.
+	* Compacted preset alias table.
+
 1.3.0	9 April 2015
 	* Added -z switch to accept direct binary strings.
 

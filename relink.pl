@@ -1,6 +1,6 @@
 #!/usr/bin/perl -pi.bak
 # relink.pl
-# Greg Cook, 9/Apr/2015
+# Greg Cook, 29/Jul/2015
 
 # CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
 # Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
@@ -40,7 +40,7 @@ if(s/(^\s+BMP_C\(0x[0-9A-Fa-f]{8}\) << \(BMP_BIT - 32\),\s+\/\*)\s*(\w+)(.*$)/sp
 s/b32\+\s*(\w+)/sprintf("b32+%3d",$x{$1})/eg;
 if(s/\"([A-Z0-9\/-]+)(\"\s*},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("\"%s%s%3d%s",$1,$2,$y,$4)/e){$y{$3} = $y++ || "0";}
 s/models\+\s*(\w+)/sprintf("models+%2d",$y{$1})/eg;
-if(s/(,\s[01]},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%3d%s",$1,$z,$3)/e){$z{$2} = $z++ || "0";}
+if(s/(,\s+models\+[\d ]\d},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%4d%s",$1,$z,$3)/e){$z{$2} = $z++ || "0";}
 s/(^\#\s*define\s+NPRESETS\s+)[1-9][0-9]*/$1$y/;
 s/(^\#\s*define\s+NALIASES\s+)[1-9][0-9]*/$1$z/;
 

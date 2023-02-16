@@ -1,5 +1,5 @@
 | RISCOSify
-| Greg Cook, 9/Apr/2015
+| Greg Cook, 31/Jul/2015
 
 | CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
 | Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
@@ -30,13 +30,13 @@ IfThere <CRCRevEng$Dir>.bin.armtubeos.reveng/inf Then SetType <CRCRevEng$Dir>.bi
 IfThere <CRCRevEng$Dir>.bin.i386-linux.reveng Then SetType <CRCRevEng$Dir>.bin.i386-linux.reveng &FE6
 IfThere <CRCRevEng$Dir>.bin.raspbian.reveng Then SetType <CRCRevEng$Dir>.bin.raspbian.reveng &FE6
 IfThere <CRCRevEng$Dir>.bin.riscos.reveng Then SetType <CRCRevEng$Dir>.bin.riscos.reveng &FF8
-IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.!!CCROMPtc Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.!!CCROMPtc &FEB
-IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.!Load Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.!Load &FEB
-IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.!Run Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.!Run &FEB
-IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.NeedPatch Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.NeedPatch &FFB
-IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.Patch429 Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.Patch429 &FFD
-IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.Patch432 Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.Patch432 &FFD
-IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.ROMPatch Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCROMPtc.ROMPatch &FFA
+IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.!!CCRomPtc Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.!!CCRomPtc &FEB
+IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.!Load Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.!Load &FEB
+IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.!Run Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.!Run &FEB
+IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.NeedPatch Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.NeedPatch &FFB
+IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.Patch429 Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.Patch429 &FFD
+IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.Patch432 Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.Patch432 &FFD
+IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.ROMPatch Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Choices.Default.Boot.PreDesk.CCRomPtc.ROMPatch &FFA
 IfThere <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Resources.!System.!Run Then SetType <CRCRevEng$Dir>.bin.riscos.Select_429.!Boot.Resources.!System.!Run &FEB
 IfThere <CRCRevEng$Dir>.bin.riscos.!System.310.Modules.CLib Then SetType <CRCRevEng$Dir>.bin.riscos.!System.310.Modules.CLib &FFA
 IfThere <CRCRevEng$Dir>.bin.riscos.!System.500.Modules.CLib Then SetType <CRCRevEng$Dir>.bin.riscos.!System.500.Modules.CLib &FFA

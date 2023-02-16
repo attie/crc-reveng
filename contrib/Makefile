@@ -1,6 +1,6 @@
 #!/usr/bin/make
 # contrib/Makefile
-# Greg Cook, 9/Apr/2015
+# Greg Cook, 31/Jul/2015
 
 # CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 # Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015  Gregory Cook
@@ -30,6 +30,8 @@ RM = rm
 TARGETS = getopt.o
 # Header files
 HEADERS = getopt.h
+
+.PHONY: clean all
 
 all: $(TARGETS)
 

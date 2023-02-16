@@ -1,5 +1,5 @@
 /* poly.c
- * Greg Cook, 9/Apr/2015
+ * Greg Cook, 29/Jul/2015
  */
 
 /* CRC RevEng, an arbitrary-precision CRC calculator and algorithm finder
@@ -21,7 +21,8 @@
  * along with CRC RevEng.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 2015-04-03: added direct mode to strtop()
+/* 2015-07-29: discard leading $, &, 0x from argument to strtop()
+ * 2015-04-03: added direct mode to strtop()
  * 2014-01-11: added LOFS(), RNDUP()
  * 2013-09-16: SIZE(), IDX(), OFS() macros bitshift if BMP_POF2
  * 2013-02-07: conditional non-2^n fix, pmpar() return mask constant type
@@ -200,7 +201,7 @@ strtop(const char *string, int flags, int bperhx) {
 	/* make two passes, one to determine the poly size
 	 * one to populate the bitmap
 	 */
-	unsigned long length = 1UL, idx;
+	unsigned long length, idx;
 	bmp_t accu;
 	bmp_t mask = bperhx == BMP_BIT ? ~BMP_C(0) : (BMP_C(1) << bperhx) - BMP_C(1);
 	int pass, count, ofs;
@@ -208,8 +209,17 @@ strtop(const char *string, int flags, int bperhx) {
 	const char *s;
 
 	poly_t poly = PZERO;
-	if(bperhx > BMP_BIT || bperhx <= 0 || string == NULL || *string == '\0')
+	if(bperhx > BMP_BIT || bperhx <= 0 || string == NULL)
 		return(poly);
+
+	if(~flags & P_DIRECT) {
+		if(*string == '$' || *string == '&')
+			++string;
+		else if(*string == '0'
+			&& (string[1] == 'x' || string[1] == 'X'))
+			string += 2;
+	}
+	length = (*string != '\0');
 
 	for(pass=0; pass<2 && length > 0UL; ++pass) {
 		s = string;
