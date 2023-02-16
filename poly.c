@@ -1,10 +1,10 @@
 /* poly.c
- * Greg Cook, 24/Dec/2021
+ * Greg Cook, 4/Jan/2022
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
  * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020  Gregory Cook
+ * 2019, 2020, 2021, 2022  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *

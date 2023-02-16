@@ -1,10 +1,10 @@
 /* cli.c
- * Greg Cook, 24/Dec/2021
+ * Greg Cook, 2/Jan/2022
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
  * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020, 2021  Gregory Cook
+ * 2019, 2020, 2021, 2022  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -149,7 +149,7 @@ main(int argc, char *argv[]) {
 			case 'e': /* e  echo arguments */
 			case 's': /* s  search for algorithm */
 			case 'v': /* v  calculate reversed CRC */
-				if(mode) {
+				if(mode && mode != c) {
 					fprintf(stderr,"%s: more than one mode switch specified.  Use %s -h for help.\n", myname, myname);
 					exit(EXIT_FAILURE);
 				}
@@ -664,7 +664,7 @@ usage(void) {
 			"\t-h | -u | -? show this help\n"
 			"\n"
 			"Copyright (C) 2010, 2011, 2012, 2013, 2014,\n"
-			"\t\t    2015, 2016, 2017, 2018, 2019, 2020, 2021  Gregory Cook\n"
+			"\t      2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022  Gregory Cook\n"
 			"This is free software; see the source for copying conditions.  There is NO\n"
 			"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 			"Version "

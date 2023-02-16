@@ -1,6 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-2019, 2020, 2021  Gregory Cook
+2019, 2020, 2021, 2022  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -752,6 +752,11 @@ detection and correction").
 Cook, Greg (24 December 2021).  "Catalogue of parametrised CRC
 algorithms".
   <https://reveng.sourceforge.io/crc-catalogue/>
+
+"Dram" (25 December 2021). "Magic tricks with CRC".
+  <https://dram.page/p/crc-tricks/>
+  <https://github.com/dramforever/dram.cf/raw/master/p/crc-tricks/
+    crc-tricks.pdf>
 
 Ewing, Gregory C. (March 2010). "Reverse-Engineering a CRC Algorithm".
 Christchurch: University of Canterbury.

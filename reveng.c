@@ -1,10 +1,10 @@
 /* reveng.c
- * Greg Cook, 24/Dec/2021
+ * Greg Cook, 4/Jan/2022
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
  * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
- * 2019, 2020, 2021  Gregory Cook
+ * 2019, 2020, 2021, 2022  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2019-12-07: skip equivalent forms
+/* 2021-12-31: modpol() passes only GCD to reveng()
+ * 2019-12-07: skip equivalent forms
  * 2019-04-30: brute-force short factor if shortest diff <= 2n
  * 2013-09-16: calini(), calout() work on shortest argument
  * 2013-06-11: added sequence number to uprog() calls
@@ -55,7 +56,7 @@
 #define FILE void
 #include "reveng.h"
 
-static poly_t *modpol(const poly_t init, int rflags, int args, const poly_t *argpolys);
+static poly_t modpol(const poly_t init, int rflags, int args, const poly_t *argpolys);
 static void dispch(const model_t *guess, int *resc, model_t **result, const poly_t divisor, int rflags, int args, const poly_t *argpolys);
 static void engini(int *resc, model_t **result, const poly_t divisor, int flags, int args, const poly_t *argpolys);
 static void calout(int *resc, model_t **result, const poly_t divisor, const poly_t init, int flags, int args, const poly_t *argpolys);
@@ -67,7 +68,7 @@ static const poly_t pzero = PZERO;
 model_t *
 reveng(const model_t *guess, const poly_t qpoly, int rflags, int args, const poly_t *argpolys) {
 	/* Complete the parameters of a model by calculation or brute search. */
-	poly_t *pworks, *wptr, rem = PZERO, factor = PZERO, gpoly = PZERO, qqpoly = PZERO;
+	poly_t pwork, rem = PZERO, factor = PZERO, gpoly = PZERO, qqpoly = PZERO;
 	model_t *result = NULL, *rptr;
 	int resc = 0;
 	unsigned long spin = 0, seq = 0;
@@ -79,27 +80,25 @@ reveng(const model_t *guess, const poly_t qpoly, int rflags, int args, const pol
 		dispch(guess, &resc, &result, guess->spoly, rflags, args, argpolys);
 	} else {
 		/* The poly is not known.
-		 * Produce a list of differences between the arguments.
+		 * Produce the GCD of all differences between the arguments.
 		 */
 		if(!plen(guess->spoly))
 			goto requit;
-		pworks = modpol(guess->init, rflags, args, argpolys);
+		pwork = modpol(guess->init, rflags, args, argpolys);
 		/* If too short a difference is returned, there is nothing to do. */
-		if(!pworks)
-			goto requit;
-		else if(plen(*pworks) < plen(guess->spoly) + 1UL)
+		if(plen(pwork) < plen(guess->spoly) + 1UL)
 			goto rpquit;
 
-		/* plen(*pworks) >= 2 */
+		/* plen(pwork) >= 2 */
 		/* If the shortest difference is the right length for the generator
 		 * polynomial (with its top bit), then it *is* the generator polynomial.
 		 */
-		else if(plen(*pworks) == plen(guess->spoly) + 1UL) {
-			pcpy(&gpoly, *pworks);
+		else if(plen(pwork) == plen(guess->spoly) + 1UL) {
+			pcpy(&gpoly, pwork);
 			/* Chop the generator. + 1 term is present
 			 * as differences come normalized from modpol().
 			 */
-			pshift(&gpoly,gpoly,0UL,1UL,plen(gpoly),0UL); /* plen(gpoly) >= 1 */
+			pshift(&gpoly,gpoly, 0UL, 1UL, plen(gpoly), 0UL); /* plen(gpoly) >= 1 */
 			dispch(guess, &resc, &result, gpoly, rflags, args, argpolys);
 			goto rpquit;
 		}
@@ -112,18 +111,18 @@ reveng(const model_t *guess, const poly_t qpoly, int rflags, int args, const pol
 		 * if shortest difference is compact.
 		 */
 		rflags &= ~R_SHORT;
-		if(plen(*pworks) <= (plen(factor)) << 1) { /* plen(*pworks) >= 4, plen(factor) >= 2 */
+		if(plen(pwork) <= (plen(factor)) << 1) { /* plen(pwork) >= 4, plen(factor) >= 2 */
 			rflags |= R_SHORT;
 			if((rflags & R_HAVEQ) || ptst(factor)) {
 				/* Validate range polynomials.
 				 * Ensure proper behaviour if the search space is
 				 * naively divided up as per the README.
 				 */
-				palloc(&rem, plen(*pworks) - plen(factor) - 1UL); /* >= 1 */
+				palloc(&rem, plen(pwork) - plen(factor) - 1UL); /* >= 1 */
 				pinv(&rem);
 				pright(&rem, plen(factor)); /* >= 1 */
 
-				/*  If start polynomial out of range, do not search. */
+				/* If start polynomial out of range, do not search. */
 				if(pcmp(&rem, &factor) < 0)
 					goto rpquit;
 				/* If end polynomial out of range, do not compare,
@@ -133,11 +132,11 @@ reveng(const model_t *guess, const poly_t qpoly, int rflags, int args, const pol
 					rflags &= ~R_HAVEQ;
 				/* Otherwise truncate end polynomial. */
 				else if(rflags & R_HAVEQ)
-					pright(&qqpoly, plen(*pworks) - plen(factor) - 1UL); /* >= 1 */
+					pright(&qqpoly, plen(pwork) - plen(factor) - 1UL); /* >= 1 */
 				pfree(&rem);
 			}
 			/* Truncate trial factor. */
-			pright(&factor, plen(*pworks) - plen(factor) - 1UL); /* >= 1 */
+			pright(&factor, plen(pwork) - plen(factor) - 1UL); /* >= 1 */
 		}
 
 		/* Clear the least significant term, to be set in the
@@ -149,69 +148,48 @@ reveng(const model_t *guess, const poly_t qpoly, int rflags, int args, const pol
 		/* plen(factor) >= 1 */
 		while(piter(&factor) && (~rflags & R_HAVEQ || pcmp(&factor, &qqpoly) < 0)) {
 			/* For each possible poly of this size, try
-			 * dividing all the differences in the list.
+			 * dividing the GCD of the differences.
 			 */
 			if(!(spin++ & R_SPMASK)) {
 				uprog(factor, guess->flags, seq++);
 			}
 			if(rflags & R_SHORT) {
-				/* test whether cofactor divides shortest difference */
-				wptr = pworks;
-				rem = pcrc(*wptr, factor, pzero, pzero, 0, NULL);
-				if(ptst(rem)) {
-					pfree(&rem);
-				} else {
+				/* test whether cofactor divides the GCD */
+				rem = pcrc(pwork, factor, pzero, pzero, 0, NULL);
+				if(!ptst(rem)) {
 					pfree(&rem);
 					/* repeat division to get generator polynomial
 					 * then test generator against other differences
 					 */
-					rem = pcrc(*wptr, factor, pzero, pzero, 0, &gpoly);
-					pfree(&rem);
+					rem = pcrc(pwork, factor, pzero, pzero, 0, &gpoly);
 					/* chop generator and ensure + 1 term */
 					pshift(&gpoly,gpoly,0UL,1UL,plen(gpoly) - 1UL,1UL);
 					piter(&gpoly); /* plen(gpoly) >= 1 */
-
-					for(++wptr; plen(*wptr); ++wptr) {
-						rem = pcrc(*wptr, gpoly, pzero, pzero, 0, NULL);
-						if(ptst(rem)) {
-							pfree(&rem);
-							break;
-						} else
-							pfree(&rem);
-					}
 				}
 			} else {
-				for(wptr = pworks; plen(*wptr); ++wptr) {
-					/* straight divide message by poly, don't multiply by x^n */
-					rem = pcrc(*wptr, factor, pzero, pzero, 0, 0);
-					if(ptst(rem)) {
-						pfree(&rem);
-						break;
-					} else
-						pfree(&rem);
-				}
+				/* straight divide message by poly, don't multiply by x^n */
+				rem = pcrc(pwork, factor, pzero, pzero, 0, 0);
 			}
 			/* If factor divides all the differences, it is a
 			 * candidate.  Search for an Init value for this
 			 * poly or if Init is known, log the result.
 			 */
-			if(!plen(*wptr)) {
+			if(!ptst(rem)) {
 				/* gpoly || factor is a candidate poly */
 				dispch(guess, &resc, &result, (rflags & R_SHORT) ? gpoly : factor, rflags, args, argpolys);
 			}
+			pfree(&rem);
 			if(!piter(&factor))
 				break;
 		}
-		/* Finished with factor and the differences list, free them.
+		/* Finished with factor and the GCD, free them.
 		 */
 rpquit:
 		pfree(&rem);
 		pfree(&qqpoly);
 		pfree(&gpoly);
 		pfree(&factor);
-		for(wptr = pworks; plen(*wptr); ++wptr)
-			pfree(wptr);
-		free(pworks);
+		pfree(&pwork);
 	}
 
 requit:
@@ -231,26 +209,22 @@ requit:
 
 /* Private functions */
 
-static poly_t *
+static poly_t
 modpol(const poly_t init, int rflags, int args, const poly_t *argpolys) {
-	/* Produce, in ascending length order, a list of differences
-	 * between the arguments in the list by summing pairs of arguments.
+	/* Produce the greatest common divisor (GCD) of differences
+	 * between pairs of arguments in argpolys[0..args-1].
 	 * If R_HAVEI is not set in rflags, only pairs of equal length are
 	 * summed.
-	 * Otherwise, sums of right-aligned pairs are also returned, with
+	 * Otherwise, sums of right-aligned pairs are included, with
 	 * the supplied init poly added to the leftmost terms of each
 	 * poly of the pair.
 	 */
-	poly_t work, swap, *result, *rptr, *iptr;
-	const poly_t *aptr, *bptr, *eptr = argpolys + args;
+	poly_t gcd = PZERO, work, rem;
+	const poly_t *aptr, *bptr, *const eptr = argpolys + args;
 	unsigned long alen, blen;
+	unsigned int nogcd = 2U;
 
-	if(args < 2) return(NULL);
-
-	if(!(result = malloc(((((args - 1) * args) >> 1) + 1) * sizeof(poly_t))))
-		uerror("cannot allocate memory for codeword table");
-
-	rptr = result;
+	if(args < 2) return(gcd);
 
 	for(aptr = argpolys; aptr < eptr; ++aptr) {
 		alen = plen(*aptr);
@@ -274,26 +248,38 @@ modpol(const poly_t init, int rflags, int args, const poly_t *argpolys) {
 
 			if(plen(work))
 				pnorm(&work);
-			if((blen = plen(work))) {
-				/* insert work into result[] in ascending order of length */
-				for(iptr = result; iptr < rptr; ++iptr) {
-					if(plen(work) < plen(*iptr)) {
-						swap = *iptr;
-						*iptr = work;
-						work = swap;
+			if(plen(work)) {
+				/* combine work with running gcd */
+				if((nogcd >>= 1))
+					pcpy(&gcd, work);
+				else while(plen(work)) {
+					/* ptst(gcd) != 0 */
+
+					/* optimisation which also accounts
+					 * for the way pmod() works.
+					 * this emulates one iteration of
+					 * a correct loop whereby
+					 * (short, long) -> (long, short)
+					 * since
+					 * poly_mod(short, long) == short
+					 * whereas pmod() left-aligns operands
+					 */
+					if(plen(gcd) < plen(work)) {
+						rem = gcd;
+						gcd = work;
+						work = rem;
 					}
-					else if(plen(*iptr) == blen && !pcmp(&work, iptr)) {
-						pfree(&work);
-						work = *--rptr;
-						break;
-					}
+					rem = pmod(gcd, work, NULL);
+					pfree(&gcd);
+					gcd = work;
+					work = rem;
+					pnorm(&work);
 				}
-				*rptr++ = work;
 			}
+			pfree(&work);
 		}
 	}
-	*rptr = pzero;
-	return(result);
+	return(gcd);
 }
 
 static void

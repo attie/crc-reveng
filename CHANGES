@@ -1,6 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
 Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
-2019, 2020, 2021  Gregory Cook
+2019, 2020, 2021, 2022  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -19,8 +19,14 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+3.0.0	4 January 2022
+	* Reduces or eliminates brute force search for POLY in many
+	  cases by finding the greatest common divisor of differences
+	  between codewords (thanks to Dram).
+
 2.1.2	24 December 2021
-	* Added algorithm CRC-8/HITAG from the CRC Catalogue.
+	* Added algorithm CRC-8/HITAG from the CRC Catalogue (thanks to
+	  Philippe Teuwen).
 
 2.1.1	14 August 2020
 	* Updated project URL.
