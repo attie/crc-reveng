@@ -1,5 +1,5 @@
 /* reveng.h
- * Greg Cook, 9/May/2019
+ * Greg Cook, 18/Nov/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -93,7 +93,7 @@
 /* Global definitions */
 
 /* CRC RevEng version string */
-#define VERSION "2.0.1"
+#define VERSION "2.0.3"
 
 /* bmpbit.c */
 typedef BMP_T bmp_t;
@@ -228,6 +228,7 @@ extern model_t *reveng(const model_t *guess, const poly_t qpoly, int rflags, int
 #define C_RESULT  8
 
 #define BUFFER 32768
+#define GSCALE     4
 
 extern int main(int argc, char *argv[]);
 extern void ufound(const model_t *model);

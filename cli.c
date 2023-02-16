@@ -1,5 +1,5 @@
 /* cli.c
- * Greg Cook, 29/Apr/2019
+ * Greg Cook, 11/Nov/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,7 +22,9 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2019-03-24: error message also requests -P before -s
+/* 2019-11-01: initialize optind, opterr
+ * 2019-11-01: grow poly geometrically in rdpoly()
+ * 2019-03-24: error message also requests -P before -s
  * 2018-07-26: NOFORCE renamed ALWPCK
  * 2017-02-18: -G ignored if R_HAVEP
  * 2017-02-05: added -G
@@ -87,13 +89,19 @@ main(int argc, char *argv[]) {
 	int c, mode = 0, args, psets, pass;
 	poly_t apoly, crc, qpoly = PZERO, *apolys, *pptr = NULL, *qptr = NULL;
 	model_t pset = model, *candmods, *mptr;
-	char *string;
+	char *string = "", **nargv = &string;
 
 	myname = argv[0];
 
+	/* reset getopt() with our extension in case user used *Go */
+	optind = 0; opterr = 0;
+	getopt(1, nargv, string); /* getopt() sees end of argument 0 */
+	getopt(1, nargv, string); /* getopt() sees end of arguments */
+	optind = 1; opterr = 1;
+
 	/* stdin must be binary */
 #ifdef _WIN32
-	_setmode(STDIN_FILENO, _O_BINARY);
+	setmode(STDIN_FILENO, O_BINARY);
 #endif /* _WIN32 */
 
 	SETBMP();
@@ -511,14 +519,35 @@ rdpoly(const char *name, int flags, int bperhx) {
 	/* read poly from file in chunks and report errors */
 
 	poly_t apoly = PZERO, chunk = PZERO;
+	unsigned long total = 0UL, a, b;
 	FILE *input;
 
 	input = oread(name);
 	while(!feof(input) && !ferror(input)) {
 		chunk = filtop(input, BUFFER, flags, bperhx);
-		psum(&apoly, chunk, plen(apoly));
+		total += plen(chunk);
+		if((a = b = total) > plen(apoly)) {
+			/* Grow apoly geometrically */
+			/* Find a = power of two not greater than total */
+			/* total > 0 */
+			while(b) {
+				a = b;
+				b &= (b - 1UL);
+			}
+			/* 0 < a <= total */
+			/* Add quanta to a until it equals or exceeds total */
+			if(!(b = a >> GSCALE))
+				b = 1UL;
+			while(a < total)
+				a += b;
+			/* Allocate a bits to apoly */
+			praloc(&apoly, a);
+		}
+		psum(&apoly, chunk, total - plen(chunk));
 		pfree(&chunk);
 	}
+	praloc(&apoly, total);
+
 	if(ferror(input)) {
 		fprintf(stderr,"%s: error condition on file '%s'\n", myname, name);
 		exit(EXIT_FAILURE);

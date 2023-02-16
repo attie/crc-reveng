@@ -19,8 +19,25 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+2.0.3	21 November 2019
+	* Added tomtorfs-wrapper.
+	* Revised poly class definitions and function entry conditions
+	  in poly.c.
+	* Added DFSFIX utility for ARM Tube OS binary.
+
+2.0.2	2 November 2019
+	* The memory allocation expands geometrically while reading
+	  polynomials from files; this improves performance on large
+	  files but memory overhead is increased during the read.
+	* The argument index is initialized at run time, allowing
+	  RISC OS and ARM Tube OS users to reinvoke CRC RevEng from
+	  memory using *Go.
+	* Replaced getopt library.
+	* Removed underscores from system calls.
+	* Updated documentation.
+
 2.0.1	9 May 2019
-	* Improved robustness of reveng()
+	* Improved robustness of reveng().
 
 2.0.0	6 May 2019
 	* Much faster brute force search for generator polynomials if

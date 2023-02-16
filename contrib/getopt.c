@@ -1,81 +1,116 @@
-/*----------------------------------------------------------------------
+/* transcript/src/getopt.c
+ *
+ * public domain getopt from mod.sources
+ * RCSID: $Header: getopt.c,v 2.1 85/11/24 11:49:10 shore Rel $
+ */
 
-    Replacement for Unix "getopt()", for DOS/Windows/etc.
+/*
+**  This is a public domain version of getopt(3).
+**  Bugs, fixes to:
+**		Keith Bostic
+**			ARPA: keith@seismo
+**			UUCP: seismo!keith
+**  Added NO_STDIO, opterr handling, Rich $alz (mirror!rs).
+**  Converted to ANSI C, optind=0 extension
+**  Greg Cook <debounce@yahoo.co.uk>
+*/
 
-    getopt.c 1.3 2003/09/17 16:17:59
-
-    Copyright (C) 1998, 2003 by David A. Hinds -- All Rights Reserved
-
-    This file is part of ASPEX.
-
-    ASPEX is free software; you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    ASPEX is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with ASPEX; if not, write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-----------------------------------------------------------------------*/
-
-#include "string.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
 #include "getopt.h"
 
-char *optarg;
-int optind = 1, opterr, optopt;
+/*
+**  Error macro.  Maybe we want stdio, maybe we don't.
+**  The (undocumented?) variable opterr tells us whether or not
+**  to print errors.
+*/
 
-int getopt(int argc, char *argv[], const char *optstring)
+#ifdef	NO_STDIO
+
+#define tell(s)								\
+	if (opterr)							\
+	{								\
+	    char	ebuf[2];					\
+	    (void)write(2, nargv, (unsigned int)strlen(nargv));		\
+	    (void)write(2, s, (unsigned int)strlen(s));			\
+	    ebuf[0] = optopt;						\
+	    ebuf[1] = '\n';						\
+	    (void)write(2, ebuf, 2);					\
+	}
+
+#else
+
+#define tell(s)								\
+	if (opterr)							\
+	    (void)fputs(*nargv, stderr),				\
+	    (void)fputs(s,stderr),					\
+	    (void)fputc(optopt, stderr),				\
+	    (void)fputc('\n', stderr)
+
+#endif
+
+
+/* Global variables. */
+static char	 EMSG[] = "";
+int		 opterr = 1;		/* undocumented error-suppressor*/
+int		 optind = 1;		/* index into argv vector	*/
+int		 optopt;		/* char checked for validity	*/
+char		*optarg;		/* arg associated with option	*/
+
+
+
+int getopt(int nargc, char **nargv, char *ostr)
 {
-    static int pos = 0;
-    char *str;
-    
-    if (pos == 0) {
-	if ((optind >= argc) || (*argv[optind] != '-'))
-	    return EOF;
-	pos = 1;
-	if (argv[optind][pos] == '\0')
-	    return EOF;
+    static char		 *place = EMSG;	/* option letter processing	*/
+    register char	 *oli;		/* option letter list index	*/
+
+    if (!optind) {			/* extension: reset getopt -GJC	*/
+	place = EMSG;
+	++optind;
+	return(EOF);
     }
-    
-    str = strchr(optstring, argv[optind][pos]);
-    if (str == NULL) {
-	optopt = argv[optind][pos];
-	if (opterr)
-	    fprintf(stderr, "%s: illegal option -- %c\n", argv[0],
-		    optopt);
-	return '?';
-    }
-    
-    if (str[1] == ':') {
-	if (argv[optind][pos+1] != '\0') {
-	    optarg = &argv[optind][pos+1];
-	    return *str;
-	}
-	optind++;
-	if (optind >= argc) {
-	    optopt = *str;
-	    if (opterr)
-		fprintf(stderr, "%s: option requires an argument -- %c\n",
-			argv[0], optopt);
-	    return '?';
-	}
-	optarg = argv[optind];
-	optind++; pos = 0;
-	return *str;
-    }
-    else {
-	pos++;
-	if (argv[optind][pos] == '\0') {
+
+    if (!*place)			/* update scanning pointer	*/
+    {
+	if (optind >= nargc || *(place = nargv[optind]) != '-' || !*++place)
+	    return(EOF);
+	if (*place == '-')		/* found "--"			*/
+	{
 	    optind++;
-	    pos = 0;
+	    return(EOF);
 	}
-	return *str;
     }
+    /* option letter okay? */
+    if ((optopt = *place++) == ':' || (oli = strchr(ostr, optopt)) == NULL)
+    {
+	if (!*place)
+	    optind++;
+	tell(": illegal option -- ");
+	goto Bad;
+    }
+    if (*++oli != ':')			/* don't need argument		*/
+    {
+	optarg = NULL;
+	if (!*place)
+	    optind++;
+    }
+    else				/* need an argument		*/
+    {
+	if (*place)
+	    optarg = place;		/* no white space		*/
+	else
+	    if (nargc <= ++optind)
+	    {
+		place = EMSG;
+		tell(": option requires an argument -- ");
+		goto Bad;
+	    }
+	    else
+		optarg = nargv[optind];	/* white space			*/
+	place = EMSG;
+	optind++;
+    }
+    return(optopt);			/* dump back option letter	*/
+Bad:
+    return('?');
 }

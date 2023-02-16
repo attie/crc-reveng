@@ -1,5 +1,5 @@
 /* poly.c
- * Greg Cook, 9/May/2019
+ * Greg Cook, 7/Nov/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2019-04-29: added quotient argument to pcrc(), pmod()
+/* 2019-11-07: reviewed poly class defs and function entry conditions
+ * 2019-04-29: added quotient argument to pcrc(), pmod()
  * 2017-11-28: added braces, redundant statement skipped in prev()
  * 2016-06-27: pcmp() shortcut returns 0 when pointers identical
  * 2015-07-29: discard leading $, &, 0x from argument to strtop()
@@ -60,8 +61,9 @@
 
 /* Note: WELL-FORMED poly_t objects have a valid bitmap pointer pointing
  * to a malloc()-ed array of at least as many bits as stated in its
- * length field.  Any poly_t with a length of 0 is also a WELL-FORMED
- * poly_t (whatever value the bitmap pointer has.)
+ * length field.  If the length is 0 then the pointer may also be equal
+ * to NULL (that is, at any length, the pointer must be a valid argument
+ * to realloc() or free().)
  * All poly_t objects passed to and from functions must be WELL-FORMED
  * unless otherwise stated.
  *
@@ -73,7 +75,7 @@
  * bit, at position (length - 1), is one.
  *
  * NORMALISED poly_t objects are SEMI-NORMALISED objects in which the
- * first bit is one.
+ * first bit, at position 0 is one.
  *
  * pfree() should be called on every poly_t object (including
  * those returned by functions) after its last use.
@@ -418,7 +420,6 @@ pcanon(poly_t *poly) {
 	 * The length field has absolute priority over the contents of the bitmap.
 	 * Canonicalisation differs from normalisation in that leading and trailing
 	 * zero terms are significant and preserved.
-	 * poly may or may not be WELL-FORMED.
 	 */
 	praloc(poly, poly->length);
 }
@@ -428,7 +429,6 @@ pnorm(poly_t *poly) {
 	/* Converts poly into a NORMALISED object by removing leading
 	 * and trailing zeroes, so that the polynomial starts and ends
 	 * with significant terms.
-	 * poly may or may not be WELL-FORMED.
 	 */
 	unsigned long first;
 
@@ -448,7 +448,6 @@ psnorm(poly_t *poly) {
 	/* Converts poly into a SEMI-NORMALISED object by removing
 	 * trailing zeroes, so that the polynomial ends with a
 	 * significant term.
-	 * poly may or may not be WELL-FORMED.
 	 */
 
 	/* call pcanon() here so plast() returns the correct result */
@@ -461,7 +460,6 @@ pchop(poly_t *poly) {
 	/* Normalise poly, then chop off the highest significant term
 	 * (produces a SEMI-NORMALISED object).  poly becomes a suitable
 	 * divisor for pcrc().
-	 * poly may or may not be WELL-FORMED.
 	 */
 
 	 /* call pcanon() here so pfirst() and plast() return correct
@@ -476,7 +474,6 @@ pkchop(poly_t *poly) {
 	/* Convert poly from Koopman notation to chopped form (produces
 	 * a SEMI-NORMALISED object).  poly becomes a suitable divisor
 	 * for pcrc().
-	 * poly may or may not be WELL-FORMED.
 	 */
 	unsigned long first;
 
@@ -531,8 +528,8 @@ psncmp(const poly_t *a, const poly_t *b) {
 	/* Compares polys for identical effect, i.e. as though the
 	 * shorter poly were padded with zeroes to the length of the
 	 * longer.
-	 * a and b must still be CLEAN, therefore psncmp() is *not*
-	 * identical to pcmp() on semi-normalised polys as psnorm()
+	 * a and b must be CLEAN, therefore psncmp(a,b) is *not*
+	 * identical to psnorm(a); psnorm(b); pcmp(a,b) as psnorm()
 	 * clears the slack space.
 	 */
 	unsigned long length, iter, idx;
@@ -616,6 +613,12 @@ plast(const poly_t poly) {
 
 poly_t
 psubs(const poly_t src, unsigned long head, unsigned long start, unsigned long end, unsigned long tail) {
+	/* Returns a freestanding copy of a substring of src.
+	 * See pshift().
+	 * src must be CLEAN in the case that the end is overrun.
+	 * If src is CLEAN then the returned poly_t is CLEAN.
+	 */
+
 	poly_t dest = PZERO;
 	pshift(&dest, src, head, start, end, tail);
 	return(dest);
@@ -626,7 +629,6 @@ pright(poly_t *poly, unsigned long length) {
 	/* Trims or extends poly to length at the left edge, prepending
 	 * zeroes if necessary.  Analogous to praloc() except the
 	 * rightmost terms of poly are preserved.
-	 * On entry, poly may or may not be WELL-FORMED.
 	 * On exit, poly is CLEAN.
 	 */
 
@@ -640,10 +642,13 @@ pright(poly_t *poly, unsigned long length) {
 
 void
 pshift(poly_t *dest, const poly_t src, unsigned long head, unsigned long start, unsigned long end, unsigned long tail) {
-	/* copies bits start to end-1 of src to dest, plus the number of leading and trailing zeroes given by head and tail.
-	 * end may exceed the length of src in which case more zeroes are appended.
-	 * dest may point to src, in which case the poly is edited in place.
-	 * src must be CLEAN.
+	/* copies bits start to end-1 of src to dest, plus the number of
+	 * leading and trailing zeroes given by head and tail.
+	 * end may exceed the length of src in which case more zeroes
+	 * are appended.
+	 * dest may point to src, in which case the poly is edited in
+	 * place.
+	 * src must be CLEAN in the case that the end is overrun.
 	 * On exit, dest is CLEAN.
 	 */
 
@@ -706,15 +711,17 @@ pshift(poly_t *dest, const poly_t src, unsigned long head, unsigned long start, 
 
 void
 ppaste(poly_t *dest, const poly_t src, unsigned long skip, unsigned long seek, unsigned long end, unsigned long fulllength) {
-	/* pastes terms of src, starting from skip, to positions seek to end-1 of dest
-	 * then sets length of dest to fulllength (>= end)
+	/* pastes terms of src, starting from skip, to positions seek to
+	 * end-1 of dest then sets length of dest to fulllength (>= end)
 	 * to paste n terms of src, give end = seek + n
 	 * to truncate dest at end of paste, set fulllength = end
 	 * to avoid truncating, set fulllength = plen(*dest)
-	 * dest may point to src, in which case the poly is edited in place.
+	 * dest may point to src, in which case the poly is edited in
+	 * place.
 	 * src must be CLEAN in the case that the end is overrun.
-	 * On exit, dest is CLEAN.
+	 * Does not clean dest unless end <= fulllength < plen(*dest).
 	 */
+
 	bmp_t mask;
 	unsigned long seekidx, endidx, iter;
 	int seekofs;
@@ -766,7 +773,8 @@ void
 pdiff(poly_t *dest, const poly_t src, unsigned long ofs) {
 	/* Subtract src from dest (modulo 2) at offset ofs.
 	 * In modulo 2 arithmetic, subtraction is equivalent to addition
-	 * We include an alias for those who wish to retain the distinction
+	 * We include an alias for those who wish to retain the
+	 * distinction
 	 * src and dest must be CLEAN.
 	 */
 	psum(dest, src, ofs);
@@ -898,6 +906,8 @@ pmod(const poly_t dividend, const poly_t divisor, poly_t *quotient) {
 	 * If calling repeatedly with a constant divisor, produce a chopped copy
 	 * with pchop() and call pcrc() directly for higher efficiency.
 	 * dividend and divisor must be CLEAN.
+	 * If dividend and divisor are CLEAN then the returned poly_t is CLEAN.
+	 * On exit, quotient is CLEAN unless it is NULL.
 	 */
 
 	/* perhaps generate an error if divisor is zero */
@@ -919,7 +929,8 @@ pcrc(const poly_t message, const poly_t divisor, const poly_t init, const poly_t
 	 * before adding init and division.  Set P_MULXN for most CRC
 	 * calculations.
 	 * All inputs must be CLEAN.
-	 * If all inputs are CLEAN, the returned poly_t will be CLEAN.
+	 * If all inputs are CLEAN then the returned poly_t is CLEAN.
+	 * On exit, quotient is CLEAN unless it is NULL.
 	 */
 	unsigned long max = 0UL, iter, ofs, resiter;
 	bmp_t probe, rem, dvsr, quot = BMP_C(0), *qptr, *rptr, *sptr;
@@ -1035,7 +1046,7 @@ piter(poly_t *poly) {
 	/* Replace poly with the 'next' polynomial of equal length.
 	 * Returns zero if the next polynomial is all zeroes, a nonzero
 	 * value otherwise.
-	 * Does not clean poly.
+	 * poly must be CLEAN.
 	 */
 	bmp_t *bptr;
 	if(!poly->length) return(0);
@@ -1053,7 +1064,6 @@ palloc(poly_t *poly, unsigned long length) {
 	 * consisting of all zeroes.
 	 * It is safe to call with length = 0, in which case the object
 	 * is freed.
-	 * poly may or may not be WELL-FORMED.
 	 * On exit, poly is CLEAN.
 	 */
 	unsigned long size = SIZE(length);
@@ -1075,7 +1085,6 @@ void
 pfree(poly_t *poly) {
 	/* Frees poly's bitmap storage and sets poly equal to the empty
 	 * polynomial (PZERO).
-	 * poly may or may not be WELL-FORMED.
 	 * On exit, poly is CLEAN.
 	 */
 
@@ -1090,7 +1099,6 @@ void
 praloc(poly_t *poly, unsigned long length) {
 	/* Trims or extends poly to length at the right edge, appending
 	 * zeroes if necessary.
-	 * On entry, poly may or may not be WELL-FORMED.
 	 * On exit, poly is CLEAN.
 	 */
 	unsigned long oldsize, size = SIZE(length);
@@ -1131,7 +1139,7 @@ praloc(poly_t *poly, unsigned long length) {
 int
 pmpar(const poly_t poly, const poly_t mask) {
 	/* Return even parity of poly masked with mask.
-	 * Poly and mask must be CLEAN.
+	 * poly and mask must be CLEAN.
 	 */
 	bmp_t res = BMP_C(0);
 	int i = BMP_SUB;
@@ -1152,7 +1160,7 @@ int
 pident(const poly_t a, const poly_t b) {
 	/* Return nonzero if a and b have the same length
 	 * and point to the same bitmap.
-	 * a and b need not be CLEAN.
+	 * a and b may or may not be CLEAN.
 	 */
 	return(a.length == b.length && a.bitmap == b.bitmap);
 }

@@ -19,23 +19,12 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 THIRD-PARTY SOFTWARE
 
-CRC RevEng incorporates source code from ASPEX under the terms of
-version 3 of the GNU General Public License (GPLv3).  ASPEX is:
-
-Copyright (C) 1998, 2003 by David A. Hinds -- All Rights Reserved
-
-Homepage: <http://aspex.sourceforge.net/>
-
-ASPEX is licensed under version 2 and all later versions of the GNU
-General Public License, therefore CRC RevEng remains licensed under
-version 3 and all later versions.
-
-Depending on one's interpretation of the License, the author created a
-modified copy of ASPEX as a whole by extracting files getopt.c and
-getopt.h verbatim on 19 December 2010.  These are found in the contrib/
-directory.  A compatible getopt module is available as standard in many
-environments and will work just as well, but this copy is included for
-those ANSI C environments that lack one.
+CRC RevEng incorporates a public domain implementation of getopt
+written by Keith Bostic and Rich Salz, with extensions added by the
+author.  This is found in the contrib/ directory as file getopt.c.  A
+compatible getopt module is available as standard in many environments
+and will work just as well, but this copy is included for those ANSI C
+environments that lack one.
 
 A copy of the RISC OS Shared C Library (CLib), and a patch to make
 certain versions of RISC OS compatible with this version of CLib, are
@@ -185,7 +174,7 @@ The options and switches for specifying a model are:
 		A hexadecimal digit string specifying the initial value
 		to set in the shift register before computing the CRC.
 		The width must be specified with -k, -m, -P or -w
-		before -i.
+		before -i INIT.
 	-k KPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed-reciprocal notation found in
@@ -220,7 +209,7 @@ The options and switches for specifying a model are:
 		-p also sets the start of the range for polynomial range
 		searching, see -q.
 		The width must be specified with -k, -m, -P or -w
-		before -p.
+		before -p POLY.
 	-P RPOLY
 		The generator polynomial (see -p), written in the
 		hexadecimal, reversed notation found in LSB-first code.
@@ -241,7 +230,7 @@ The options and switches for specifying a model are:
 		A hexadecimal digit string specifying the value to be
 		added to the final shift register value before output.
 		The width must be specified with -k, -m, -P or -w
-		before -x.
+		before -x XOROUT.
 
 Other model-related options:
 
@@ -276,13 +265,15 @@ representations of a given underlying binary sequence.
 
 When passing messages as files or as raw binary strings, the same
 division into characters applies; bytes of the message are read until
-enough bits have been collected, then a specified number of bits are
-taken from the specified least significant end of the collection (see
--y), reflected (if RefIn = True) and added to the binary representation.
+enough bits have been collected, then the number of bits specified by -a
+are taken from the specified least significant end of the collection
+(see -y), reflected (if RefIn = True) and added to the binary
+representation.
 
 When printing CRCs, the binary representation is again divided into
-characters, each of which is reversed (if RefOut = True) and printed
-with the minimum sufficient number of hex digits.
+characters (of size specified by the -A option), each of which is
+reversed (if RefOut = True) and printed with the minimum sufficient
+number of hex digits.
 
 Output model records conform to the Williams model set out in "A
 Painless Guide to CRC Error Detection Algorithms".  To recap, the model
@@ -303,25 +294,26 @@ then reading a single one bit.
 The refout parameter, if equal to false, specifies that the contents of
 the register after reading the last message bit are unreflected before
 presentation; if equal to true, it specifies that they are reflected,
-character-by-character, before presentation.  For the purpose of this
-definition, the reflection is performed by swapping the content of each
-cell with that of the cell an equal distance from the opposite end of
-the register; the characters of CRCs output by -c and -v are then true
-images of parts of the reflected register, the character containing the
-original MSB always appearing first.  The xorout parameter defines the
-XOR value applied to the contents of the register after the last message
-bit has been read and after the optional reflection.  The check
-parameter defines the contents of the register after initialising,
-reading the UTF-8 string "123456789" (as 8-bit characters), optionally
-reflecting, and applying the final XOR.  The residue parameter defines
-the contents of the register after initialising, reading an error-free
-codeword and optionally reflecting the register (if refout=true), but
-not applying the final XOR.  This is mathematically equivalent to
-initialising the register with the xorout parameter, reflecting it as
-described (if refout=true), reading as many zero bits as there are cells
-in the register, and reflecting the result (if refin=true).  The residue
-of a crossed-endian model is calculated assuming that the characters of
-the received CRC are specially reflected before submitting the codeword.
+character-by-character, before presentation.  For the purpose of the
+definitions below, the reflection is performed before the division into
+characters, by swapping the content of each cell with that of the cell
+an equal distance from the opposite end of the register; the characters
+(size defined by -A) of CRCs output by -c and -v are then true images of
+parts of the reflected register, the character containing the original
+MSB always appearing first.  The xorout parameter defines the XOR value
+applied to the contents of the register after the last message bit has
+been read and after the optional reflection.  The check parameter
+defines the contents of the register after initialising, reading the
+UTF-8 string "123456789" (as 8-bit characters), optionally reflecting,
+and applying the final XOR.  The residue parameter defines the contents
+of the register after initialising, reading an error-free codeword and
+optionally reflecting the register (if refout=true), but not applying
+the final XOR.  This is mathematically equivalent to initialising the
+register with the xorout parameter, reflecting it as described (if
+refout=true), reading as many zero bits as there are cells in the
+register, and reflecting the result (if refin=true).  The residue of a
+crossed-endian model is calculated assuming that the characters of the
+received CRC are specially reflected before submitting the codeword.
 
 width is printed as a decimal integer.  poly, init, xorout, check and
 residue are true images of the shift register at various times, printed
@@ -460,7 +452,7 @@ old CRC, with Init = 0:
 
 Now exclusive-OR the two returned CRCs together, and insert the result
 in the unused space.  CRC RevEng can be used to do the exclusive-OR if a
-hex calculator is not to hand:
+hex calculator is not at hand:
 
 	reveng -w 16 -p 0001 -c 9dc51505
 	88c0
@@ -672,7 +664,8 @@ CRC RevEng provides a few additional options for convenience:
 		each argument, so that when the argument is not a whole
 		number of bytes long, an equivalent string can be
 		produced for input to a bytewise calculator (which has
-		Init set to 0).
+		Init set to 0).  To prevent this once Init has been set,
+		follow with -k 0.
 	-h
 	-u
 	-?
