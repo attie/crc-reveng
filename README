@@ -1,5 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -57,7 +58,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 90 currently listed models available as presets.
+algorithms", with the 91 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -89,6 +90,13 @@ In RISC OS, with the Acorn Desktop Development Environment (DDE)
 installed, click Menu on the file RISCOSify, and set its type to
 Obey.  Double-click Select first on RISCOSify, then on Mk/RISCOS.
 
+In non-ASCII compatible environments, the array aliases[] in file
+preset.c may need to be reordered to suit the local string collation
+order.  The correct order of models[] and aliases[] can be verified at
+compile time by the error-free completion of this command:
+
+	make clean pretst
+
 Otherwise, enter commands similar to the following to compile CRC RevEng
 on any ANSI C compliant compiler:
 
@@ -111,7 +119,7 @@ command line.
 
 SYNOPSIS
 
-Usage:	reveng	-cdDesvhu? [-bBfFlLMrStVXyz]
+Usage:	reveng	-cdDesvhu? [-bBfFGlLMrStVXyz]
 		[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL]
 		[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT]
 		[STRING...]
@@ -128,12 +136,13 @@ Options:
 	-x XOROUT	final register XOR value
 Modifier switches:
 	-b big-endian CRC		-B big-endian CRC output
-	-f read files named in STRINGs	-F find presets less quickly
-	-l little-endian CRC		-L little-endian CRC output
-	-M non-augmenting algorithm	-r right-justified output
-	-S print spaces between chars	-t left-justified output
-	-V reverse algorithm only	-X print uppercase hex
-	-y low bytes first in files	-z raw binary STRINGs
+	-f read files named in STRINGs	-F skip preset model check pass
+	-G skip brute force search pass	-l little-endian CRC
+	-L little-endian CRC output	-M non-augmenting algorithm
+	-r right-justified output	-S print spaces between characters
+	-t left-justified output	-V reverse algorithm only
+	-X print uppercase hexadecimal	-y low bytes first in files
+	-z raw binary STRINGs
 Mode switches:
 	-c calculate CRCs		-d dump algorithm parameters
 	-D list preset algorithms	-e echo (and reformat) input
@@ -540,8 +549,9 @@ big-endian range search, and one little-endian full search.
 The full list of search options is as follows:
 
 	-F
-		Do not check against the preset models before searching.
-		(Not recommended.)
+		Skip the preset model check pass.  (Not recommended.)
+	-G
+		Skip the brute force search pass.
 	-p POLY
 		When followed by -q QPOLY, sets the start of the range
 		(inclusive) for polynomial range searching.  POLY is
@@ -610,16 +620,18 @@ catalogue.
 
 REFERENCES
 
-Adler, Mark (13 May 2016). "zlib Home Site" (section "CRC (Cyclic
+Adler, Mark (15 January 2017). "zlib Home Site" (section "CRC (Cyclic
 Redundancy Check) Bonus Information").  Contains links to spoof.c.gz and
 crcany.tar.gz.
   <http://zlib.net/>
+  <https://github.com/madler?tab=repositories>
 
 Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
-  <http://www.lammertbies.nl/forum/viewforum.php?f=11>
+  <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (27 July 2016).  "Catalogue of parametrised CRC algorithms".
+Cook, Greg (6 February 2017).  "Catalogue of parametrised CRC
+algorithms".
   <http://reveng.sourceforge.net/crc-catalogue/>
 
 Ewing, Gregory C. (March 2010). "Reverse-Engineering a CRC Algorithm".
@@ -632,7 +644,7 @@ Internet Applications".  The International Conference on Dependable
 Systems and Networks: 459-468.  doi:10.1109/DSN.2002.1028931.
   <https://users.ece.cmu.edu/~koopman/networks/dsn02/dsn02_koopman.pdf>
 
-Koopman, Philip (21 January 2016). "Best CRC Polynomials". Pittsburgh:
+Koopman, Philip (23 January 2017). "Best CRC Polynomials". Pittsburgh:
 Carnegie Mellon University.
   <https://users.ece.cmu.edu/~koopman/crc/>
 
@@ -643,7 +655,7 @@ doi:10.1109/DSN.2004.1311885.
   <https://users.ece.cmu.edu/~koopman/roses/dsn04/
     koopman04_crc_poly_embedded.pdf>
 
-Pircher, Thomas (19 March 2016). pycrc. Python based parametrised CRC
+Pircher, Thomas (12 December 2016). pycrc. Python based parametrised CRC
 calculator and C code generator.
   <https://pycrc.org/>
 
@@ -656,7 +668,7 @@ University Berlin.
 Williams, Ross N. (24 September 1996). "A Painless Guide to CRC Error
 Detection Algorithms V3.00".
   <http://www.ross.net/crc/download/crc_v3.txt>
-  <http://www.repairfaq.org/filipg/LINK/F_crc_v3.html>
+  <http://www.wolfgang-ehrhardt.de/crc_v3.html>
 
 INSPIRATION
 
@@ -665,9 +677,9 @@ CRC RevEng came about from the coincidence of four events:
 * Finding the following problems on Lammert Bies' forum, which were
   beyond the precision or speed of crcbfs.pl:
   o "baexps_pr1", 3 August 2010, reverse CRC-64 calculation
-    <http://www.lammertbies.nl/forum/viewtopic.php?t=1589>
+    <https://www.lammertbies.nl/forum/viewtopic.php?t=1589>
   o "movilsystem", 20 August 2010, unknown CRC-16 in 2055-byte codewords
-    <http://www.lammertbies.nl/forum/viewtopic.php?t=1595>
+    <https://www.lammertbies.nl/forum/viewtopic.php?t=1595>
 * Meeting Llamasoft founder Jeff Minter at the R3PLAY Expo 2010 in
   Blackpool, and subsequently reading his posts on Twitter that November
   on the progress of code for his game, "Minotaur Rescue".
@@ -675,6 +687,12 @@ CRC RevEng came about from the coincidence of four events:
 * Heavy snowfall in London from 30 November 2010, and:
 * An Internet outage on 2 December 2010, diverting attention to
   rainy-day projects.
+
+THANKS
+
+The author would like to thank Dr. Mark Adler, Lammert Bies, Wolfgang
+Ehrhardt, Greg Ewing, Prof. Philip Koopman, Thomas Pircher, Dr. Ross
+Williams, and all contributors to CRC RevEng and the CRC Catalogue.
 
 AUTHOR
 

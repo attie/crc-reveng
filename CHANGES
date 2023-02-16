@@ -1,5 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -17,6 +18,12 @@ You should have received a copy of the GNU General Public License
 along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
+
+1.5.0	8 February 2017
+	* Added algorithm CRC-64/GO-ISO and 2 new aliases,
+	  CRC-64/ECMA-182, CRC-64/GO-ECMA, from the CRC Catalogue.
+	* Added a residue field to Williams model output records.
+	* Added -G switch to skip the brute force search pass.
 
 1.4.4	27 July 2016
 	* Added 5 new algorithms, CRC-8/AUTOSAR, CRC-8/OPENSAFETY,

@@ -1,9 +1,10 @@
 /* model.c
- * Greg Cook, 26/Jul/2016
+ * Greg Cook, 7/Feb/2017
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016  Gregory Cook
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+ * Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -21,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2016-02-22: split off preset.c
+/* 2017-02-05: added magic field
+ * 2016-02-22: split off preset.c
  * 2012-03-03: single-line Williams model string conversion
  * 2011-09-03: added mrev(), mnovel()
  * 2011-01-17: fixed ANSI C warnings (except preset models)
@@ -53,6 +55,7 @@ mcpy(model_t *dest, const model_t *src) {
 	pcpy(&dest->init, src->init);
 	pcpy(&dest->xorout, src->xorout);
 	pcpy(&dest->check, src->check);
+	pcpy(&dest->magic, src->magic);
 	dest->flags = src->flags;
 	/* link to the name as it is static */
 	dest->name = src->name;
@@ -66,6 +69,7 @@ mfree(model_t *model) {
 	pfree(&model->init);
 	pfree(&model->xorout);
 	pfree(&model->check);
+	pfree(&model->magic);
 	/* not name as it is static */
 	/* not model either, it might point to an array! */
 }
@@ -94,25 +98,28 @@ mtostr(const model_t *model) {
 	 * mcanon() should be called on the argument before printing.
 	 */
 	size_t size;
-	char *polystr, *initstr, *xorotstr, *checkstr, strbuf[512], *string = NULL;
+	char *polystr, *initstr, *xorotstr, *checkstr, *magicstr,
+		strbuf[512], *string = NULL;
 
 	if(!model) return(NULL);
 	polystr = ptostr(model->spoly, P_RTJUST, 4);
 	initstr = ptostr(model->init, P_RTJUST, 4);
 	xorotstr = ptostr(model->xorout, P_RTJUST, 4);
 	checkstr = ptostr(model->check, P_RTJUST, 4);
+	magicstr = ptostr(model->magic, P_RTJUST, 4);
 
 	sprintf(strbuf, "%lu", plen(model->spoly));
 	size =
-		70
-		+ (model->name && *model->name ? 2 + strlen(model->name) : 6)
+		82
 		+ strlen(strbuf)
 		+ (polystr && *polystr ? strlen(polystr) : 6)
 		+ (initstr && *initstr ? strlen(initstr) : 6)
 		+ (model->flags & P_REFIN ? 4 : 5)
 		+ (model->flags & P_REFOUT ? 4 : 5)
 		+ (xorotstr && *xorotstr ? strlen(xorotstr) : 6)
-		+ (checkstr && *checkstr ? strlen(checkstr) : 6);
+		+ (checkstr && *checkstr ? strlen(checkstr) : 6)
+		+ (magicstr && *magicstr ? strlen(magicstr) : 6)
+		+ (model->name && *model->name ? 2 + strlen(model->name) : 6);
 	if((string = malloc(size))) {
 		sprintf(strbuf, "\"%s\"", model->name);
 		sprintf(string,
@@ -123,6 +130,7 @@ mtostr(const model_t *model) {
 				"refout=%s  "
 				"xorout=0x%s  "
 				"check=0x%s  "
+				"residue=0x%s  "
 				"name=%s",
 				plen(model->spoly),
 				polystr && *polystr ? polystr : "(none)",
@@ -131,12 +139,14 @@ mtostr(const model_t *model) {
 				(model->flags & P_REFOUT) ? "true" : "false",
 				xorotstr && *xorotstr ? xorotstr : "(none)",
 				checkstr && *checkstr ? checkstr : "(none)",
+				magicstr && *magicstr ? magicstr : "(none)",
 				(model->name && *model->name) ? strbuf : "(none)");
 	}
 	free(polystr);
 	free(initstr);
 	free(xorotstr);
 	free(checkstr);
+	free(magicstr);
 	if(!string)
 		uerror("cannot allocate memory for model description");
 	return(string);
@@ -165,23 +175,37 @@ mcanon(model_t *model) {
 	 * might be noticed.  Storing the Check value with each preset
 	 * is highly preferred.
 	 */
-	if(!plen(model->check))
+	if(!plen(model->check) || !plen((model->magic)))
 		mcheck(model);
 }
 
 void
 mcheck(model_t *model) {
 	/* calculate a check for the model */
-	poly_t checkstr, check;
+	poly_t checkstr, check, xorout, magic;
+
+	/* erase existing check and magic.  Models with these
+	 * fields recalculated should have no name.
+	 */
+	mnovel(model);
 
 	/* generate the check string with the correct bit order */
 	checkstr = strtop("313233343536373839", model->flags, 8);
 	check = pcrc(checkstr, model->spoly, model->init, pzero, model->flags);
+	pfree(&checkstr);
 	if(model->flags & P_REFOUT)
 		prev(&check);
 	psum(&check, model->xorout, 0UL);
 	model->check = check;
-	pfree(&checkstr);
+
+	xorout=pclone(model->xorout);
+	if(model->flags & P_REFOUT)
+		prev(&xorout);
+	magic = pcrc(xorout, model->spoly, pzero, pzero, model->flags);
+	pfree(&xorout);
+	if(model->flags & P_REFOUT)
+		prev(&magic);
+	model->magic = magic;
 }
 
 void
@@ -220,4 +244,5 @@ mnovel(model_t *model) {
 	/* remove name and check string from modified model */
 	model->name = NULL;
 	pfree(&model->check);
+	pfree(&model->magic);
 }
