@@ -1,5 +1,5 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
 Gregory Cook
 
 This file is part of CRC RevEng.
@@ -58,7 +58,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 91 currently listed models available as presets.
+algorithms", with the 103 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -114,15 +114,14 @@ config.h to suit your architecture.  Having done so, define the macro
 PRESETS in config.h and recompile as above.
 
 Some enterprise users may wish to disable the -F switch to minimise CPU
-usage.  To do this, define the macro NOFORCE in config.h or on the
+usage.  To do this, define the macro ALWPCK in config.h or on the
 command line.
 
 SYNOPSIS
 
 Usage:	reveng	-cdDesvhu? [-bBfFGlLMrStVXyz]
-		[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL]
-		[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT]
-		[STRING...]
+	[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL] [-p POLY]
+	[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT] [STRING...]
 Options:
 	-a BITS		bits per character (1 to n)
 	-A OBITS	bits per output character (1 to n)
@@ -156,11 +155,12 @@ You can use one of the preset models or specify your own.
 	reveng -m crc-32
 
 selects the CRC-32 algorithm used in PKZIP and elsewhere.  You can dump
-any preset model as a Williams model record using -d:
+any preset model as an extended Williams model record using -d:
 
 	reveng -m crc-32 -d
 	width=32  poly=0x04c11db7  init=0xffffffff  refin=true
-	refout=true  xorout=0xffffffff  check=0xcbf43926  name="CRC-32"
+	refout=true  xorout=0xffffffff  check=0xcbf43926
+	residue=0xdebb20e3  name="CRC-32"
 
 You can specify the parameters of the model instead:
 
@@ -246,23 +246,24 @@ The options and switches for specifying a model are:
 Other model-related options:
 
 	-d
-		Dump a Williams model record of the specified model on
-		standard output.  Though formatted differently, this
-		single-line record has identical semantics to the
+		Dump an extended Williams model record of the specified
+		model on standard output.  Though formatted differently,
+		this single-line record has identical semantics to the
 		multi-line records presented in "A Painless Guide to CRC
-		Error Detection Algorithms".  Disabled for the
-		non-compliant models created by -M.
+		Error Detection Algorithms", with the addition of a
+		Residue field.  Disabled for the non-compliant models
+		created by -M.
 	-D
-		Dump Williams model records of all preset models on
-		standard output.
+		Dump extended Williams model records of all preset
+		models on standard output.
 
 INPUT AND OUTPUT
 
 Messages for CRC RevEng to process can be specified as files, as raw
 binary strings, or as numerical (typically hexadecimal) string arguments
-on the command line.  Output from CRC RevEng is either as Williams model
-records (having their own fixed format) or as numerical string arguments
-printed one per line on standard output.
+on the command line.  Output from CRC RevEng is either as extended
+Williams model records (having their own fixed format) or as numerical
+string arguments printed one per line on standard output.
 
 When passing numerical arguments on the command line, each argument is
 conceptually divided into characters, each character consisting of one
@@ -279,9 +280,54 @@ enough bits have been collected, then a specified number of bits are
 taken from the specified least significant end of the collection (see
 -y), reflected (if RefIn = True) and added to the binary representation.
 
-When printing output, the binary representation is again divided into
+When printing CRCs, the binary representation is again divided into
 characters, each of which is reversed (if RefOut = True) and printed
 with the minimum sufficient number of hex digits.
+
+Output model records conform to the Williams model set out in "A
+Painless Guide to CRC Error Detection Algorithms".  To recap, the model
+consists of a linear feedback shift register (LFSR) having the number
+of bit cells defined in the width parameter, and shifting from right to
+left.  The init parameter defines the settings of the bit cells at the
+start of each calculation, before reading the first message bit.  The
+refin parameter, if equal to false, specifies that the characters of the
+message (whose size is specified by -a) are read bit-by-bit, most
+significant bit (MSB) first; if equal to true, the characters are read
+bit-by-bit, least significant bit (LSB) first.  Each sampled message bit
+is then XORed with the bit being simultaneously shifted out of the
+register at the most significant end, and the result is passed to the
+feedback taps.  The poly parameter specifies the feedback taps of the
+register - it is the result of initialising the register to all zeroes,
+then reading a single one bit.
+
+The refout parameter, if equal to false, specifies that the contents of
+the register after reading the last message bit are unreflected before
+presentation; if equal to true, it specifies that they are reflected,
+character-by-character, before presentation.  For the purpose of this
+definition, the reflection is performed by swapping the content of each
+cell with that of the cell an equal distance from the opposite end of
+the register; the characters of CRCs output by -c and -v are then true
+images of parts of the reflected register, the character containing the
+original MSB always appearing first.  The xorout parameter defines the
+XOR value applied to the contents of the register after the last message
+bit has been read and after the optional reflection.  The check
+parameter defines the contents of the register after initialising,
+reading the UTF-8 string "123456789" (as 8-bit characters), optionally
+reflecting, and applying the final XOR.  The residue parameter defines
+the contents of the register after initialising, reading an error-free
+codeword and optionally reflecting the register (if refout=true), but
+not applying the final XOR.  This is mathematically equivalent to
+initialising the register with the xorout parameter, reflecting it as
+described (if refout=true), reading as many zero bits as there are cells
+in the register, and reflecting the result (if refin=true).  The residue
+of a crossed-endian model is calculated assuming that the characters of
+the received CRC are specially reflected before submitting the codeword.
+
+width is printed as a decimal integer.  poly, init, xorout, check and
+residue are true images of the shift register at various times, printed
+as hexadecimal integers.  refin and refout are Boolean values, displayed
+as either true or false.  The name parameter is the name assigned to
+a preset model, enclosed in double quotes, otherwise (none).
 
 INPUT/OUTPUT OPTIONS
 
@@ -305,12 +351,12 @@ and output:
 		-a  4	Single hex digits (numerical arguments only).
 		-a  3	Single octal digits 0-7.
 		-a  1	Single binary digits 0-1.
-		Note that raw messages (files or arguments) containing
-		digits will only be read as expected if there are no
-		characters except digits (not even a final newline or
+		Note that raw messages (files or arguments) consisting
+		of digits will only be read as digit values if there are
+		no characters except digits (not even a final newline or
 		other whitespace), and if the digits are maskable in the
 		system character encoding, as digits 0-9 are in ASCII,
-		EBCDIC and Unicode.  This is because the lowest bits of
+		EBCDIC and UTF-8.  This is because the lowest bits of
 		each byte are extracted as described above.
 	-A OBITS
 		Specifies the number of bits per character in output.
@@ -489,21 +535,32 @@ that bit ordering.  Otherwise, it tries RefIn = False, RefOut = False
 then RefIn = True, RefOut = True.  Crossed-endian algorithms are also
 uncommon and the program will not search for them.
 
-To find the Poly value when Init is not known, at least two arguments
-must have the same length.
+To find the Poly value when Init is not known, there must be at least
+two arguments having the same length.
 
-To find both the Init and XorOut values, at least two arguments must
-have different lengths; otherwise there is only enough information to
-determine one value, given the other.  If all arguments have the same
-length then, by default,  CRC RevEng fixes XorOut at zero and calculates
-Init accordingly.  (In hardware it is easier to set a non-zero Init than
-to apply a non-zero XorOut.)  To set XorOut to another value, specify
--x XOROUT; to fix Init and calculate XorOut instead, use -i INIT.
+To find both the Init and XorOut values, there must be at least two
+arguments having different lengths; otherwise there is only enough
+information to determine one value, given the other.  If all arguments
+have the same length then, by default,  CRC RevEng fixes XorOut at zero
+and calculates Init accordingly.  (In hardware it is easier to set a
+non-zero Init than to apply a non-zero XorOut.)  To set XorOut to
+another value, specify -x XOROUT; to fix Init and calculate XorOut
+instead, use -i INIT.
 
 When bit strings are input with -a 1, there is no information on
 endianness.  In such cases -s returns the big- and little-endian forms
 of each algorithm found.  The Check values of these forms will differ,
 as they are always calculated on the 8-bit UTF-8 string "123456789".
+The Residue values will be each other's mirror images.
+
+Each CRC algorithm whose generator polynomial is a multiple of (x + 1)
+has one or more aliases.  Aliases differ in Init, XorOut and Residue
+values, but they produce identical CRCs at all message lengths.
+Therefore unless -i INIT or -x XOROUT are specified, any such algorithm
+and its aliases are always returned together, no matter how many
+codewords are given.  (If (x + 1) appears n times in the factorisation
+of G(x), then there shall be 2^n - 1 aliases.)
+
 
 POLYNOMIAL RANGE SEARCHING
 
@@ -551,7 +608,10 @@ The full list of search options is as follows:
 	-F
 		Skip the preset model check pass.  (Not recommended.)
 	-G
-		Skip the brute force search pass.
+		Skip the brute force search pass.  Ignored if a
+		generator polynomial has been specified, so that the
+		brute force search pass may return results on the
+		polynomial.
 	-p POLY
 		When followed by -q QPOLY, sets the start of the range
 		(inclusive) for polynomial range searching.  POLY is
@@ -605,9 +665,11 @@ CAVEATS
 
 In addition to the disclaimers listed at the top of this file and in the
 GNU General Public License (see file COPYING), remember that CRC RevEng
-is merely a search tool, and not authoritative.  Searching is only
-statistical and any particular result may be a fluke, especially from
-a small number of samples.  Also any output is only as accurate as the
+is a search tool.  The return of a CRC model as a search result is a
+statement that all the given codeword samples satisfy that model, not a
+proof that the model, or any CRC algorithm at all, produced those
+samples.  Any particular search result may be a fluke, especially from a
+small number of samples.  Also any output is only as accurate as the
 input.
 
 Model reversal (-V, -v) makes little sense on crossed-endian models.
@@ -623,15 +685,14 @@ REFERENCES
 Adler, Mark (15 January 2017). "zlib Home Site" (section "CRC (Cyclic
 Redundancy Check) Bonus Information").  Contains links to spoof.c.gz and
 crcany.tar.gz.
-  <http://zlib.net/>
+  <https://zlib.net/>
   <https://github.com/madler?tab=repositories>
 
 Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (6 February 2017).  "Catalogue of parametrised CRC
-algorithms".
+Cook, Greg (25 July 2018).  "Catalogue of parametrised CRC algorithms".
   <http://reveng.sourceforge.net/crc-catalogue/>
 
 Ewing, Gregory C. (March 2010). "Reverse-Engineering a CRC Algorithm".
@@ -669,6 +730,7 @@ Williams, Ross N. (24 September 1996). "A Painless Guide to CRC Error
 Detection Algorithms V3.00".
   <http://www.ross.net/crc/download/crc_v3.txt>
   <http://www.wolfgang-ehrhardt.de/crc_v3.html>
+  <https://www.repairfaq.org/filipg/LINK/F_crc_v3.html>
 
 INSPIRATION
 

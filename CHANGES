@@ -1,5 +1,5 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
 Gregory Cook
 
 This file is part of CRC RevEng.
@@ -18,6 +18,26 @@ You should have received a copy of the GNU General Public License
 along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
+
+1.5.3	26 July 2018
+	* Added algorithm CRC-24/OS-9 from the CRC Catalogue.
+	* Optimised prev() (thanks to Joerg Stippa).
+	* Optimised definition of struct malias.
+	* Renamed NOFORCE to ALWPCK.
+
+1.5.2	20 June 2017
+	* Added 3 new algorithms, CRC-8/BLUETOOTH, CRC-17/CAN-FD,
+	  CRC-21/CAN-FD, from the CRC Catalogue.
+
+1.5.1	18 February 2017
+	* Added 8 new algorithms, CRC-3/GSM, CRC-6/GSM, CRC-8/GSM-A,
+	  CRC-8/GSM-B, CRC-10/GSM, CRC-12/GSM, CRC-14/GSM, CRC-16/GSM,
+	  from the CRC Catalogue.
+	* -G is ignored if a generator polynomial is specified, so that
+	  it serves as a general fast-run switch.  The brute force
+	  search pass is then allowed to return results on the
+	  polynomial.
+	* Revised calculation of residue for crossed-endian algorithms.
 
 1.5.0	8 February 2017
 	* Added algorithm CRC-64/GO-ISO and 2 new aliases,

@@ -1,9 +1,9 @@
 #!/usr/bin/perl -i.bak
 # relink.pl
-# Greg Cook, 7/Feb/2017
+# Greg Cook, 26/Jul/2018
 
 # CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
-# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+# Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
 # Gregory Cook
 #
 # This file is part of CRC RevEng.
@@ -44,15 +44,15 @@ until(($_ = <>) =~ /(?:aliases\+\s*\w+|\"[A-Z0-9\/-]+\")\s*},\s+\/\*\s*\w+\s*\*\
 
 do {
 	s/b32\+\s*(\w+)/sprintf("b32+%3d",$x{$1})/eg;
-	if(s/(aliases\+\s*\w+|\"[A-Z0-9\/-]+\")(\s*},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%s%3d%s",$1,$2,$y,$4)/e){$y{$3} = $y++ || "0";}
+	if(s/(aliases\+\s*\w+|\"[A-Z0-9\/-]+\")(\s*},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%s%4d%s",$1,$2,$y,$4)/e){$y{$3} = $y++ || "0";}
 	push(@models,$_);
 } until(($_ = <>) =~ /(^\#\s*define\s+NPRESETS\s+)[1-9][0-9]*/);
 
 do {
 	s/(^\#\s*define\s+NPRESETS\s+)[1-9][0-9]*/$1$y/;
-	s/models\+\s*(\w+)/sprintf("models+%2d",$y{$1})/e;
-	if(s/(,\s+models\+[\d ]\d},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%4d%s",$1,$z,$3)/e){$z{$2} = $z++ || "0";}
-	if(/(\"[^"]+\")\s*,\s+models\+[\d ]\d},\s+\/\*\s*\w+\s*\*\//){$z{$1} = $z - 1;}
+	s/models\+\s*(\w+)/sprintf("models+%3d",$y{$1})/e;
+	if(s/(,\s+models\+\s*\d{1,3}},\s+\/\*)\s*(\w+)(\s*\*\/)/sprintf("%s%4d%s",$1,$z,$3)/e){$z{$2} = $z++ || "0";}
+	if(/(\"[^"]+\")\s*,\s+models\+\s*\d{1,3}},\s+\/\*\s*\w+\s*\*\//){$z{$1} = $z - 1;}
 	push(@aliases,$_);
 } until(($_ = <>) =~ /(^\#\s*define\s+NALIASES\s+)[1-9][0-9]*/);
 

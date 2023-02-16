@@ -3,7 +3,10 @@ Greg Cook, 7 February 2017
 
 CRC RevEng has been tested on a 16MB SPROW ARM7TDMI Coprocessor running
 ARM Tube OS version 0.45, with OS 1.20 and OPUS EDOS 0.4 (EDOSPAT 4.90)
-on the host.  Installation on disc is strongly recommended.
+on the host.  Installation on disc is strongly recommended.  On this
+hardware a brute force search for a 32-bit CRC algorithm, given two
+5-byte codewords and a 6-byte codeword, completes in approximately
+10 hours 40 minutes.
 
 To load and run the ARM Tube OS binary successfully, the Disc Filing
 System (DFS) on the host computer must support at least the following:

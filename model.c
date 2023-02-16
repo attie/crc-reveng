@@ -1,9 +1,9 @@
 /* model.c
- * Greg Cook, 7/Feb/2017
+ * Greg Cook, 26/Jul/2018
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
  * Gregory Cook
  *
  * This file is part of CRC RevEng.
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2017-02-05: added magic field
+/* 2017-02-19: revised residue calculation for crossed-endian models
+ * 2017-02-05: added magic field
  * 2016-02-22: split off preset.c
  * 2012-03-03: single-line Williams model string conversion
  * 2011-09-03: added mrev(), mnovel()
@@ -175,7 +176,7 @@ mcanon(model_t *model) {
 	 * might be noticed.  Storing the Check value with each preset
 	 * is highly preferred.
 	 */
-	if(!plen(model->check) || !plen((model->magic)))
+	if(!(plen(model->check) && plen(model->magic)))
 		mcheck(model);
 }
 
@@ -198,12 +199,17 @@ mcheck(model_t *model) {
 	psum(&check, model->xorout, 0UL);
 	model->check = check;
 
+	/* calculate residue by emulating receipt of error-free message
+	 * The residue of a crossed-endian model is calculated assuming
+	 * that the characters of the received CRC are specially
+	 * reflected before submitting the codeword.
+	 */
 	xorout=pclone(model->xorout);
 	if(model->flags & P_REFOUT)
 		prev(&xorout);
 	magic = pcrc(xorout, model->spoly, pzero, pzero, model->flags);
 	pfree(&xorout);
-	if(model->flags & P_REFOUT)
+	if(model->flags & P_REFIN)
 		prev(&magic);
 	model->magic = magic;
 }

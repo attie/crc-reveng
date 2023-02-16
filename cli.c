@@ -1,9 +1,9 @@
 /* cli.c
- * Greg Cook, 7/Feb/2017
+ * Greg Cook, 26/Jul/2018
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
  * Gregory Cook
  *
  * This file is part of CRC RevEng.
@@ -22,7 +22,9 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2017-02-05: added -G
+/* 2018-07-26: NOFORCE renamed ALWPCK
+ * 2017-02-18: -G ignored if R_HAVEP
+ * 2017-02-05: added -G
  * 2016-06-27: -P sets width like -k
  * 2015-04-03: added -z
  * 2013-09-16: do not search with -M
@@ -131,7 +133,7 @@ main(int argc, char *argv[]) {
 				mode = c;
 				break;
 			case 'F': /* F  skip preset model check pass */
-#ifndef NOFORCE
+#ifndef ALWPCK
 				uflags |= C_NOPCK;
 #endif
 				break;
@@ -311,11 +313,10 @@ ipqx:
 			args = mcount();
 			if(!args)
 				uerror("no preset models available");
-			for(mode = 0; mode < args; ++mode) {
-				mbynum(&model, mode);
-				mcanon(&model);
+			do {
+				mbynum(&model, --args);
 				ufound(&model);
-			}
+			} while(args);
 			break;
 		case 'd': /* d  dump CRC model */
 			/* maybe we don't want to do this:
@@ -343,10 +344,10 @@ ipqx:
 			}
 			break;
 		case 's': /* s  search for algorithm */
-			if(!width)
-				uerror("must specify positive -k or -w before -s");
 			if(~model.flags & P_MULXN)
 				uerror("cannot search for non-Williams compliant models");
+			if(!width)
+				uerror("must specify positive -k or -w before -s");
 			praloc(&model.spoly, width);
 			praloc(&model.init, width);
 			praloc(&model.xorout, width);
@@ -409,7 +410,6 @@ ipqx:
 						pfree(&apoly);
 						if(qptr == pptr) {
 							/* the selected model solved all arguments */
-							mcanon(&pset);
 							ufound(&pset);
 							uflags |= C_RESULT;
 						}
@@ -429,7 +429,7 @@ ipqx:
 					pfree(qptr);
 				exit(EXIT_SUCCESS);
 			}
-			if(uflags & C_NOBFS) {
+			if(uflags & C_NOBFS && ~rflags & R_HAVEP) {
 				uerror("no models found");
 				break;
 			}
@@ -557,9 +557,8 @@ usage(void) {
 	fputs(myname, stderr);
 	fprintf(stderr,
 			"\t-cdDesvhu? [-bBfFGlLMrStVXyz]\n"
-			"\t\t[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL]\n"
-			"\t\t[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT]\n"
-			"\t\t[STRING...]\n"
+			"\t[-a BITS] [-A OBITS] [-i INIT] [-k KPOLY] [-m MODEL] [-p POLY]\n"
+			"\t[-p POLY] [-P RPOLY] [-q QPOLY] [-w WIDTH] [-x XOROUT] [STRING...]\n"
 			"Options:\n"
 			"\t-a BITS\t\tbits per character (1 to %d)\n"
 			"\t-A OBITS\tbits per output character (1 to %d)\n"
@@ -589,7 +588,8 @@ usage(void) {
 			"\t-s search for algorithm\t\t-v calculate reversed CRCs\n"
 			"\t-h | -u | -? show this help\n"
 			"\n"
-			"Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017  Gregory Cook\n"
+			"Copyright (C)\n"
+			"2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018  Gregory Cook\n"
 			"This is free software; see the source for copying conditions.  There is NO\n"
 			"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 			"Version "
