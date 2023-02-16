@@ -1,10 +1,10 @@
 /* cli.c
- * Greg Cook, 26/Jul/2018
+ * Greg Cook, 24/Mar/2019
  */
 
 /* CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
- * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
- * Gregory Cook
+ * Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
+ * 2019  Gregory Cook
  *
  * This file is part of CRC RevEng.
  *
@@ -22,7 +22,8 @@
  * along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/* 2018-07-26: NOFORCE renamed ALWPCK
+/* 2019-03-24: error message also requests -P before -s
+ * 2018-07-26: NOFORCE renamed ALWPCK
  * 2017-02-18: -G ignored if R_HAVEP
  * 2017-02-05: added -G
  * 2016-06-27: -P sets width like -k
@@ -347,7 +348,7 @@ ipqx:
 			if(~model.flags & P_MULXN)
 				uerror("cannot search for non-Williams compliant models");
 			if(!width)
-				uerror("must specify positive -k or -w before -s");
+				uerror("must specify positive -k, -P or -w before -s");
 			praloc(&model.spoly, width);
 			praloc(&model.init, width);
 			praloc(&model.xorout, width);
@@ -589,7 +590,7 @@ usage(void) {
 			"\t-h | -u | -? show this help\n"
 			"\n"
 			"Copyright (C)\n"
-			"2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018  Gregory Cook\n"
+			"2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019  Gregory Cook\n"
 			"This is free software; see the source for copying conditions.  There is NO\n"
 			"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
 			"Version "

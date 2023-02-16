@@ -1,6 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
-Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
+2019  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -18,6 +18,17 @@ You should have received a copy of the GNU General Public License
 along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
+
+1.6.3	20 April 2019
+	* Added algorithm CRC-32/CD-ROM-EDC from the CRC Catalogue.
+	* Model class of CRC-16/ARC, CRC-16/GSM changed to 'attested'.
+	* Error message advises that a positive -P may also precede -s.
+
+1.6.2	5 March 2019
+	* Added algorithm CRC-8/MIFARE-MAD from the CRC Catalogue.
+
+1.6.1	28 December 2018
+	* mnovel() clears the model's class flags.
 
 1.6.0	21 November 2018
 	* Added 2 new algorithms, CRC-8/NRSC-5, CRC-16/NRSC-5, from the

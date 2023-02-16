@@ -1,6 +1,6 @@
 CRC RevEng: arbitrary-precision CRC calculator and algorithm finder
-Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018
-Gregory Cook
+Copyright (C) 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018,
+2019  Gregory Cook
 
 This file is part of CRC RevEng.
 
@@ -58,7 +58,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 105 currently listed models available as presets.
+algorithms", with the 107 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -692,7 +692,7 @@ Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (21 November 2018).  "Catalogue of parametrised CRC
+Cook, Greg (19 April 2019).  "Catalogue of parametrised CRC
 algorithms".
   <http://reveng.sourceforge.net/crc-catalogue/>
 
