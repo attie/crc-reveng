@@ -19,6 +19,10 @@ along with CRC RevEng.  If not, see <https://www.gnu.org/licenses/>.
 
 Revision history of CRC RevEng
 
+3.0.3	8 May 2022
+	* Added algorithm CRC-16/M17 from the CRC Catalogue (thanks to
+	  Mark Adler).
+
 3.0.2	12 January 2022
 	* Reading a file which exceeds the size limit of polynomials
 	  causes an error.

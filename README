@@ -47,7 +47,7 @@ byte order-independent CRC calculator and algorithm finder in ANSI C.
 It is a port and expansion of the author's crcbfs.pl script from 2007,
 and runs up to 200 times faster on equivalent problems.  It is also a
 reference implementation of the author's "Catalogue of parametrised CRC
-algorithms", with the 110 currently listed models available as presets.
+algorithms", with the 111 currently listed models available as presets.
 
 To the author's knowledge CRC RevEng is the first published compiled
 application to address the general case of CRC algorithm reversal and
@@ -96,9 +96,8 @@ Mk/RISCOS is compatible with both !Make and !AMU.
 Alternatively, install GCC4 (and optionally Bash) from the cloud using
 the package manager !PackMan.  Run RISCOSify as above, then press F12 or
 Ctrl+F12 to obtain a command prompt.  Navigate to the directory
-containing CRC RevEng by entering the filing system's command (SDFS, RAM
-etc.) and then the appropriate Dir command.  With Bash installed, enter
-the following:
+containing CRC RevEng by entering the appropriate Dir command.  With
+Bash installed, enter the following:
 
 	Run <Packages$Apps>.Development.!GCC
 	Run <Packages$Apps>.Utilities.!Bash
@@ -299,7 +298,8 @@ representation.
 When printing CRCs, the binary representation is again divided into
 characters (of size specified by -A OBITS), each of which is reversed
 (if RefOut = True) and printed with the minimum sufficient number of hex
-digits.
+digits.  The alignment of the character divisions is controlled by -r
+and -t.
 
 Output model records conform to the Williams model set out in "A
 Painless Guide to CRC Error Detection Algorithms".  To recap, the model
@@ -658,10 +658,10 @@ The full list of search options is as follows:
 	-1
 		Skip (do not list) the equivalent forms of each
 		model found during the brute force search pass; Ewing's
-		algorithm is terminated after finding the lexically
-		least solution to Init.
-		The form that is listed may not necessarily match
-		the definition printed in a specification document.
+		algorithm terminates after finding the lexically least
+		solution to Init.
+		The form that is listed may or may not match
+		the definition given in a specification document.
 	-F
 		Skip the preset model check pass.  (Not recommended.)
 	-G
@@ -751,8 +751,7 @@ Bies, Lammert; et al.  "Computer Interfacing Forum" (section "Error
 detection and correction").
   <https://www.lammertbies.nl/forum/viewforum.php?f=11>
 
-Cook, Greg (11 January 2022).  "Catalogue of parametrised CRC
-algorithms".
+Cook, Greg (7 May 2022).  "Catalogue of parametrised CRC algorithms".
   <https://reveng.sourceforge.io/crc-catalogue/>
 
 "Dram" (25 December 2021). "Magic tricks with CRC".

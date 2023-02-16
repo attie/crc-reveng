@@ -1,11 +1,12 @@
 System requirements of ARM Tube OS binary
-Greg Cook, 24 December 2021
+Greg Cook, 11 July 2022
 
 CRC RevEng has been tested on a 16MB SPROW ARM7TDMI Coprocessor running
 ARM Tube OS version 0.45, with OS 1.20 on the host.  Installation on
 disc is strongly recommended.
 The following filing systems are known to be compatible:-
 
+- EDOS 1.13
 - Opus EDOS 0.4, patched by EDOSPAT versions 4.90, 5.66 or 7.06
 - Opus DDOS 3.15 or higher with DFSfix installed (see below)
 - Slogger Challenger 1.03 or 2.00 with Chafix installed (see below)
@@ -93,7 +94,7 @@ To install DFSfix, enter the following:
 
 The supplied binary is assembled to reside in the sector buffer of
 file handle &15.  This preserves compatibility with all the BBC Micro's
-facilities, as long as at most four files are opened simultaneously -
+facilities, provided that at most four files are opened simultaneously -
 a limit seldom reached in practice.
 
 To install Chafix, enter the following:
